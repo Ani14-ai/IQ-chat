@@ -9,10 +9,13 @@ import speech_recognition as sr
 import pyttsx3
 from flask_cors import CORS
 from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv()
+secret_key = os.getenv("SECRET_KEY")
+client = OpenAI(api_key=os.getenv("openai_key"))
 app = Flask(__name__)
-CORS(app)
-client = OpenAI(api_key=)
-
+socketio = SocketIO(app, port=3012, cors_allowed_origins="*")
+CORS(app, resources={"/api/*": {"origins": "*"}})
 def preprocess_text(text):
     tokens = word_tokenize(text.lower())
     stop_words = set(stopwords.words('english'))

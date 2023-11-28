@@ -10,6 +10,7 @@ import pyttsx3
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
+import os
 load_dotenv()
 client = OpenAI(api_key=os.getenv("openai_key"))
 app = Flask(__name__)

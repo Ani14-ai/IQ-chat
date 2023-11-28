@@ -326,7 +326,7 @@ chatbot_model = create_chatbot(question_db, answer_db)
 
 @app.route('/')
 def index():
-    return render_template("zz.html")
+    return render_template("Frontend.html")
 
 @app.route('/api/chat', methods=['POST'])
 def chat():

@@ -1320,9 +1320,10 @@ function receiveMessage(sender, message) {
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-let isSpeaking=false;	    
+let isSpeaking=false;
 function speakMessage(text) {
 var utterance = new SpeechSynthesisUtterance(text);
+window.speechSynthesis.speak(utterance);
 if (isSpeaking) {
     window.speechSynthesis.cancel();
     isSpeaking = false;
@@ -1332,8 +1333,7 @@ if (isSpeaking) {
 utterance.lang = 'en';
 utterance.rate = 1.0;
 utterance.pitch = 1.0;
-// Speak the text
-window.speechSynthesis.speak(utterance);
+
 isSpeaking = true;
 currentUtterance = utterance;
 // Listen for the end event to know when the speech is finished
@@ -1341,7 +1341,9 @@ utterance.addEventListener('end', () => {
     isSpeaking = false;
     currentUtterance=utterance// Reset the isSpeaking flag when speech ends
 });
+
 }
+
 
         function getUserInput() {
             return document.getElementById("user-input").value;

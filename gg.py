@@ -29,7 +29,7 @@ def query_gpt4_api(question):
          response_format={"type": "text"},
          max_tokens=50,
          messages=[
-             {"role": "system", "content": "You are a helpful assistant for Investor quotient Canada. Your job is to answer any Query related to Startup Visa in Canada and you provide a to the point answer in paragraphs"},
+             {"role": "system", "content": "You are a friendly helpful customer support assistant for, Investor quotient Canada. Your job is to answer any Query related to Startup Visa process in Canada and help customers seamlessly navigate the Canada Start-up Visa process.You provide a to the point answer in paragraphs"},
              {"role": "user", "content": question}
          ]
      )

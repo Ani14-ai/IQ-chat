@@ -1270,56 +1270,21 @@ function sendMessage(sender, message) {
 function receiveMessage(sender, message) {
     var chatDisplay = document.getElementById("chat-display");
     var messageClass = sender === 'You' ? 'user-message' : 'chatbot-message';
-
-    // Create a div for the message bubble
-    var messageBubble = document.createElement('div');
-    messageBubble.className = messageClass;
-
-    // Create the chatbot icon element
-    if (sender !== 'You') {
-        var chatbotIcon = document.createElement('img');
-        chatbotIcon.src = 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp';
-        chatbotIcon.alt = 'Chatbot Icon';
-        chatbotIcon.className = 'chatbot-icon';
-        messageBubble.appendChild(chatbotIcon);
-    }
-
-    // Create the message bubble content
-    var messageContent = document.createElement('div');
-    messageContent.className = 'message-bubble';
-    messageContent.textContent = message;
-
-    // Create the user icon element
-    if (sender === 'You') {
-        var userIcon = document.createElement('img');
-        userIcon.src = 'https://cdn-icons-png.flaticon.com/128/1177/1177568.png';
-        userIcon.alt = 'User Icon';
-        userIcon.className = 'user-icon';
-        messageBubble.appendChild(userIcon);
-    }
-
-    // Create the sound icon element
-    var soundIcon = document.createElement('img');
-    soundIcon.src = 'https://cdn-icons-png.flaticon.com/128/4340/4340178.png';
-    soundIcon.alt = 'Sound Icon';
-    soundIcon.className = 'sound-icon';
-    soundIcon.onclick = function() {
-        speakMessage(message);
-    };
-
-    // Append the message content and sound icon to the message bubble
-    messageBubble.appendChild(messageContent);
-    messageBubble.appendChild(soundIcon);
-
-    // Append the message bubble to the chat display
-    chatDisplay.appendChild(messageBubble);
-
-    // Clear the user input
+    chatDisplay.innerHTML += `<div class="${messageClass}">
+                                <img src="${sender === 'You' ? 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp' : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp'}" alt="${sender} Icon" class="${sender === 'You' ? 'user-icon' : 'chatbot-icon'}">
+                                <div class="message-bubble">${message}</div>
+                                ${sender === 'Chatbot' ? `<img class="sound-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340178.png" onclick="toggleSound('${message}')">` : ''}
+                            </div>`;
     document.getElementById("user-input").value = "";
 
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
-}
 
+    // Speak the message using the text-to-speech API
+    if (sender === 'Chatbot') {
+        speakMessage(message);
+    }
+}
+	    
 let isSpeaking=false;
 function speakMessage(text) {
 var utterance = new SpeechSynthesisUtterance(text);

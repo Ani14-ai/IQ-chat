@@ -807,7 +807,19 @@ var wpcf7 = {"api":{"root":"https:\/\/iqcanada.ca\/wp-json\/","namespace":"conta
         flex-direction: column;
         animation: fadeIn 0.5s ease-out;
 	display: none;
-    }
+	transform-origin: top right;
+    transform: scale(0);
+    transition: transform 0.5s ease-in-out;
+		}
+
+#chatbot-icon:hover {
+    transform: scale(1.2); /* Enlarge the icon on hover */	
+}
+
+#chat-container.zoom-in {
+    transform: scale(1); /* Scale back to normal size */
+    transition: transform 0.5s ease-in-out;
+}
 
     #chat-display {
         max-height: calc(100% - 200px);
@@ -826,31 +838,36 @@ var wpcf7 = {"api":{"root":"https:\/\/iqcanada.ca\/wp-json\/","namespace":"conta
     right: 70px;
     cursor: pointer;
     z-index: 999; /* Ensure it appears above other elements */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 	
 
 #chatbot-icon img {
-    width: 70px; /* Adjust the width as needed */
-    height: 70px; /* Adjust the height as needed */
+    width: 50px; /* Adjust the width as needed */
+    height: 50px; /* Adjust the height as needed */
     border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    opacity: 1;
 }
+
+	
+
 
 	#chatbot-icon::after {
     content: attr(data-tooltip);
     position: absolute;
-    background: linear-gradient(to bottom, #00021e, #153b62);
+    background: linear-gradient(to bottom, rgba(0, 2, 30, 0.6), rgba(21, 59, 98, 0.6)); /* Adjust the RGBA values and alpha (transparency) as needed */
     color: white;
     padding: 25px;
-    border: 1px solid black;
+    border: 0px;
     border-radius: 35px;
     font-size: 12px;
     word-spacing: 1.5px;
     margin-bottom: 20px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    visibility: hidden;
+    opacity: 1;
+    transition: opacity 0.3s, transform 0.3s;
+    visibility: visible;
     width: 200px; /* Customize width */
     text-align: center; /* Center-align text */
     margin-top: -75px; /* Adjust vertical position */
@@ -858,24 +875,22 @@ var wpcf7 = {"api":{"root":"https:\/\/iqcanada.ca\/wp-json\/","namespace":"conta
     
 }
 
-	#chatbot-icon:hover::before {
+	#chatbot-icon::before {
     content: '';
+    background: linear-gradient(to bottom, rgba(0, 2, 30, 0.6), rgba(21, 59, 98, 0.6)); /* Adjust the RGBA values and alpha (transparency) as needed */
     position: absolute;
     border-style: solid;
     border-width: 10px 10px 0;
-    border-color: #153b62 transparent transparent transparent;
-    top: -15%;
+    border-color: rgba(21, 59, 98, 0.5) transparent transparent transparent;
+    top: -20%;
     left: 20%;
     transform: translateY(50%);
-    
-}
-
-
-#chatbot-icon:hover::after {
     opacity: 1;
     visibility: visible;
-    
 }
+
+
+
 
 
     @keyframes fadeIn {
@@ -978,7 +993,7 @@ var wpcf7 = {"api":{"root":"https:\/\/iqcanada.ca\/wp-json\/","namespace":"conta
         word-spacing: 1.2px;
         max-width: calc(65% - 40px);
         background-color: #6683b0;
-        border-radius: 0px 15px 15px 15px ;
+        border-radius: 0px 25px 25px 25px ;
         color: white;
 	position: relative;
         margin-right: auto;
@@ -1011,7 +1026,7 @@ var wpcf7 = {"api":{"root":"https:\/\/iqcanada.ca\/wp-json\/","namespace":"conta
         cursor: pointer;
         display: none;
     }
-    .chatbot-message:last-child .sound-icon {
+.chatbot-message:last-child .sound-icon {
     display: inline-block;
 }
 
@@ -1143,7 +1158,7 @@ var wpcf7 = {"api":{"root":"https:\/\/iqcanada.ca\/wp-json\/","namespace":"conta
         <div id="chat-display"></div>
 
         <div id="user-input-container">
-            <img src="https://cdn-icons-png.flaticon.com/128/4727/4727424.png" alt="User Icon" class="user-icon-input">
+            <img src="https://cdn-icons-png.flaticon.com/512/1177/1177568.png" alt="User Icon" class="user-icon-input">
             <textarea id="user-input" placeholder="Ask me any visa-related queries..."></textarea>
 	    <input type="file" id="audio-input" accept="audio/*" style="display: none;">
 	    <img id="microphone-icon" src="https://cdn-icons-png.flaticon.com/128/3293/3293623.png" alt="Microphone Icon" onclick="startRecording()">
@@ -1212,7 +1227,7 @@ function sendMessage(sender, message) {
 
     // Append the user or chatbot icon to the message bubble
     var iconSrc = sender === 'You'
-        ? 'https://cdn-icons-png.flaticon.com/128/4727/4727424.png'
+        ? 'https://cdn-icons-png.flaticon.com/512/1177/1177568.png'
         : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp';
 
     var iconAlt = sender === 'You' ? 'User Icon' : 'Chatbot Icon';
@@ -1252,89 +1267,85 @@ function sendMessage(sender, message) {
 
 
 
-let abortController;  // Declare a variable to store the AbortController instance
-
-// Function to start or stop text-to-speech
-function toggleTextToSpeech(message) {
-    if (abortController) {
-        stopTextToSpeech();
-    } else {
-        startTextToSpeech(message);
-    }
-}
-// Function to stop text-to-speech
-function stopTextToSpeech() {
-            if (abortController) {
-                abortController.abort();  // Abort the current request
-                abortController = null;   // Reset the AbortController
-            }
-        }
-
-  // Function to start text-to-speech
-  function startTextToSpeech(message) {
-            // Your existing text-to-speech code...
-            speakMessage(message);
-        }
-
-
 function receiveMessage(sender, message) {
     var chatDisplay = document.getElementById("chat-display");
     var messageClass = sender === 'You' ? 'user-message' : 'chatbot-message';
-    chatDisplay.innerHTML += `<div class="${messageClass}">
-                                <img src="${sender === 'You' ? 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp' : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp'}" alt="${sender} Icon" class="${sender === 'You' ? 'user-icon' : 'chatbot-icon'}">
-                                <div class="message-bubble">${message}</div>
-                                ${sender === 'Chatbot' ? `<img class="sound-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340178.png" onclick="toggleSound('${message}')">` : ''}
-                            </div>`;
-    document.getElementById("user-input").value = "";
-   
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
 
-    // Speak the message using the text-to-speech API
-    if (sender === 'Chatbot') {
-        speakMessage(message);
+    // Create a div for the message bubble
+    var messageBubble = document.createElement('div');
+    messageBubble.className = messageClass;
+
+    // Create the chatbot icon element
+    if (sender !== 'You') {
+        var chatbotIcon = document.createElement('img');
+        chatbotIcon.src = 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp';
+        chatbotIcon.alt = 'Chatbot Icon';
+        chatbotIcon.className = 'chatbot-icon';
+        messageBubble.appendChild(chatbotIcon);
     }
+
+    // Create the message bubble content
+    var messageContent = document.createElement('div');
+    messageContent.className = 'message-bubble';
+    messageContent.textContent = message;
+
+    // Create the user icon element
+    if (sender === 'You') {
+        var userIcon = document.createElement('img');
+        userIcon.src = 'https://cdn-icons-png.flaticon.com/128/1177/1177568.png';
+        userIcon.alt = 'User Icon';
+        userIcon.className = 'user-icon';
+        messageBubble.appendChild(userIcon);
+    }
+
+    // Create the sound icon element
+    var soundIcon = document.createElement('img');
+    soundIcon.src = 'https://cdn-icons-png.flaticon.com/128/4340/4340178.png';
+    soundIcon.alt = 'Sound Icon';
+    soundIcon.className = 'sound-icon';
+    soundIcon.onclick = function() {
+        speakMessage(message);
+    };
+
+    // Append the message content and sound icon to the message bubble
+    messageBubble.appendChild(messageContent);
+    messageBubble.appendChild(soundIcon);
+
+    // Append the message bubble to the chat display
+    chatDisplay.appendChild(messageBubble);
+
+    // Clear the user input
+    document.getElementById("user-input").value = "";
+
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-async function speakMessage(text) {
-    try {
-        if (abortController) {
-            abortController.abort();  // Abort the previous request if it exists
-        }
-
-        abortController = new AbortController();  // Create a new AbortController
-
-        // Fetch the text-to-speech API
-        const response = await fetch('/text-to-speech', {
-            method: 'POST',
-            signal: abortController.signal,  // Pass the signal to the fetch request
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                'text': text,
-            }),
-        });
-
+function speakMessage(text) {
+    // Fetch the text-to-speech API
+    fetch('/text-to-speech', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            'text': text,
+        }),
+    })
+    .then(response => {
         if (response.ok) {
             console.log('Text-to-speech request successful.');
+
+            // Once the audio file is generated, play it using an <audio> element
+            const audio = new Audio('/output.mp3');
+            audio.play();
         } else {
             console.error('Text-to-speech request failed.');
         }
-    } catch (error) {
+    })
+    .catch(error => {
         console.error('Error fetching text-to-speech API:', error);
-    }
+    });
 }
-
-// Function to toggle sound on/off
-function toggleSound(message) {
-    if (abortController) {
-        abortController.abort();  // Abort the current request
-        abortController = null;   // Reset the AbortController
-    } else {
-        speakMessage(message);  // Start a new request if there is no ongoing request
-    }
-}
-
         function getUserInput() {
             return document.getElementById("user-input").value;
         }
@@ -1346,7 +1357,6 @@ function toggleSound(message) {
                 setTimeout(function () {
                     receiveMessage("Chatbot", "Please choose one of the following options:");
                     showOptions(["Eligibilty criteria", "Language Requirements", "Apply now"]); // Customize the options as needed
-                
                 }, 1000);
 
             }, 1000);
@@ -1486,6 +1496,8 @@ function toggleSound(message) {
 
     // Show the chat container
     chatContainer.style.display = 'flex';
+
+	chatContainer.classList.add('zoom-in');
 }
 
 	function closeChatbot() {
@@ -1497,10 +1509,10 @@ function toggleSound(message) {
 
     // Hide the chat container
     chatContainer.style.display = 'none';
+
+	chatContainer.classList.remove('zoom-in');
 }
-document.querySelector('.sound-icon').addEventListener('click', function () {
-            toggleTextToSpeech("Your chatbot message here.");
-        });
+
     </script>
 
 </body>

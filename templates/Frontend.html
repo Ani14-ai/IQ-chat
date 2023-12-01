@@ -1320,9 +1320,7 @@ function receiveMessage(sender, message) {
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-let isSpeaking=false;
-let currentutterance;
-	    
+let isSpeaking=false;	    
 function speakMessage(text) {
 var utterance = new SpeechSynthesisUtterance(text);
 if (isSpeaking) {

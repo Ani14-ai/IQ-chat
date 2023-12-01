@@ -1320,32 +1320,37 @@ function receiveMessage(sender, message) {
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
 }
 
-function speakMessage(text) {
-    // Fetch the text-to-speech API
-    fetch('/text-to-speech', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-            'text': text,
-        }),
-    })
-    .then(response => {
-        if (response.ok) {
-            console.log('Text-to-speech request successful.');
+let isSpeaking = false;
+let currentUtterance;
 
-            // Once the audio file is generated, play it using an <audio> element
-            const audio = new Audio('/output.mp3');
-            audio.play();
-        } else {
-            console.error('Text-to-speech request failed.');
-        }
-    })
-    .catch(error => {
-        console.error('Error fetching text-to-speech API:', error);
+function speakMessage(text) {
+    // If speaking, cancel the current speech
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        return;
+    }
+
+    // Create a new SpeechSynthesisUtterance
+    var utterance = new SpeechSynthesisUtterance(text);
+
+    // Optionally set properties like voice, rate, pitch, etc.
+    utterance.lang = 'en';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    // Speak the text
+    window.speechSynthesis.speak(utterance);
+
+    isSpeaking = true;
+    currentUtterance = utterance;
+    // Listen for the end event to know when the speech is finished
+    utterance.addEventListener('end', () => {
+        isSpeaking = false; // Reset the isSpeaking flag when speech ends
     });
+
 }
+
         function getUserInput() {
             return document.getElementById("user-input").value;
         }

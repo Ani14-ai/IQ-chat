@@ -127,7 +127,7 @@ chatbot_model=create_startup_visa_chatbot()
 
 @app.route('/')
 def index():
-    return render_template("frontendupdated.html")
+    return render_template("Frontend.html")
 
 
 @app.route('/api/chat', methods=['POST'])

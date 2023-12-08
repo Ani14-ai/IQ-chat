@@ -15,6 +15,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("openai_key"))
 app = Flask(__name__)
 CORS(app, resources={"/api/*": {"origins": "*"}})
+conversation_history = []
 def preprocess_text(text):
     tokens = word_tokenize(text.lower())
     stop_words = set(stopwords.words('english'))
@@ -23,349 +24,126 @@ def preprocess_text(text):
     tokens = [porter.stem(word) for word in tokens]
     return ' '.join(tokens)
 
-def query_gpt4_api(question):
-     response = client.chat.completions.create(
-         model="gpt-3.5-turbo-1106",
+def gpt(prompt,ch):
+  response= client.chat.completions.create(
+         model="gpt-4",
          response_format={"type": "text"},
-         max_tokens=50,
+         temperature=0.1,
+         max_tokens=100,
          messages=[
-             {"role": "system", "content": "You are a friendly helpful customer support assistant for, Investor quotient Canada. Your job is to answer any Query related to Startup Visa process in Canada and help customers seamlessly navigate the Canada Start-up Visa process.You provide a to the point answer in paragraphs"},
-             {"role": "user", "content": question}
-         ]
-     )
-     return response.choices[0].message.content
+             {"role": "system", "content": "You are a helpful assistant,called Daniel, for Investor Quotient Canada. You have a knowledge about the company and the visa process in Canada as well. You provide precise and short answers in  1 or 2 lines(not in points). You always engage in a conversation with the customer."},
+             {"role": "user", "content": "What is the eligibility criteria ?"},
+             {"role":"assistant", "content": "Canada’s Start-up Visa Program targets entrepreneurs with the skills and potential to build businesses in Canada., Intent to incorporate business in Canada,Each applicant holds 10% voting rights, Proof of personal settlement funds, All applicants combined over 50% voting rights. Control IP/assets within business. English proficiency (CLB 5), Up to 5 Founders in a startup allowed, No age and education threshold. Would you like to know more?"},
+             {"role": "user", "content": "Who should apply with IQ Canada?"},             
+             {"role":"assistant", "content": "In the Early-Stage Start-ups phase, the program emphasizes validating business ideas and assessing market potential. Companies receive support in product development to smoothly transition to the subsequent market launch stage. For Seed Stage Start-ups, having an MVP and a customer base, the focus shifts to establishing businesses in Canada, securing product-market fit, and accessing an international network of partners and mentors. Growth Stage Start-ups, having gained a significant market share and funding, benefit from personalized advisory services, partnerships, and network support. Selected companies receive comprehensive guidance on Canadian business operations, dedicated partnerships, investor introductions, and opportunities to explore new revenue channels for accelerated growth.Would you like to know more?"} , 
+             {"role": "user", "content": "Explain the startup visa program at Canada."},
+             {"role": "assistant", "content": "THE IQ Canada Start-up Visa Program stands as a leading solution for entrepreneurs and businesses seeking comprehensive support in establishing and expanding their operations within Canada. With a dedicated team of experienced business and legal professionals and a network of esteemed partners, IQ Canada offers innovative solutions to ensure a seamless entry into the Canadian market. The program, unique in its simplicity, provides a clear pathway to permanent resident status and citizenship for entrepreneurs. Interested individuals with start-up ideas, innovative concepts, or existing businesses in their home country can apply, with the support of designated entities like venture capitalists, angel investors, or Canadian incubators. The program accommodates up to five applicants per business, each holding a minimum of 10% voting rights, making it an attractive option for those aiming for long-term residency. The program boasts advantages such as fast processing times, allowing for permanent residence before landing in Canada, while its drawbacks include the appointment of only one applicant to represent the entire group during the evaluation process.Do you want to know more?"},
+             {"role": "user", "content": "who can apply?"},
+             {"role": "assistant", "content":"Entrepreneurs with a business start-up concept, an innovative idea, or ownership of an existing start-up in their home country are eligible to apply. Up to five applicants can claim business ownership, each holding a minimum of 10% voting rights, and collectively, they must possess at least 50% of the total voting rights within the firm. Do you want to apply?"},
+             {"role": "user", "content": "what are your responsibilities"},
+             {"role": "assistant", "content":"IQ Canada, within its Start-up Visa Program, collaborates with registered start-ups, shouldering responsibilities such as assessing immigration eligibility, PR and work permit applications, business viability evaluation, go-to-market strategy creation, and providing expertise in market dynamics. The range of services extends to concept validation, pitch deck and business plan development, intellectual property solutions, financial modeling, corporate structuring, mentoring, and facilitating access to networks, clients, vendors, and investment opportunities. Additionally, IQ Canada assists in applying for government grants or funding."},
+             {"role": "user", "content": "What services does IQ Canada offer for investors interested in Start-ups?"}, 
+             {"role": "assistant", "content": "IQ Canada provides comprehensive services for investors looking to invest in start-ups. Whether you're a novice in the investment realm or an experienced professional ready to expand your portfolio, IQ Canada offers expertise, resources, and connections to guide and accelerate your success. The services cater to international investors, fostering growth-oriented private equity solutions. Collaborating with global investors, IQ Canada identifies investment requirements, strategies, preferred industries, and immigration needs. The process involves matching investors with Canadian start-up companies exhibiting robust business models and significant growth potential. The support extends to providing professional services through strategic partners, including tax and personal finance advice, real estate assistance, and logistical services like establishing office space and preparing corporate documents. With a focus on facilitating investment in businesses, IQ Canada ensures a seamless experience for investors interested in the dynamic world of Canadian start-up investments. Do you want more details?"}, 
+             {"role": "user", "content": "Can you explain the eligibility criteria for the Start-up Visa Program?"}, 
+             {"role": "assistant", "content": "Certainly! Canada's Start-up Visa Program targets immigrant entrepreneurs with the skills and potential to build businesses in Canada. To be eligible, entrepreneurs must have innovative business ideas capable of creating jobs for Canadians and competing globally. Additionally, they need support from a designated organization, such as a venture capital fund or business incubator. Other requirements include proof of personal settlement funds, intent to incorporate a business in Canada, control of IP/assets within the business, and English proficiency (CLB 5). Importantly, there is no age or education threshold, and up to five founders in a startup are allowed. The program offers a direct pathway to permanent residency and citizenship, making it an attractive option for visionary entrepreneurs. Do you have more questions about the Start-up Visa Program?"}, 
+             {"role": "user", "content": "What steps are involved in applying for Permanent Residency under the Startup Visa Program?"}, 
+             {"role": "assistant", "content": "Applying for Permanent Residency under the Start-up Visa Program involves several key steps. Here's a brief overview: Prepare your Pitch Deck: A condensed version of your business plan. Submit your application to a designated organization for review and evaluation.\n3. Undergo an interview(s) with the designated organization., Sign an agreement with the designated organization. Pay the required fees to the designated organization. Obtain a Letter of Support from the designated organization(s). Submit your application for permanent residency and work permit.The processing time for the Start-up Visa Program can vary, and the waiting period for a final decision on an application is typically between 18 months to 3 years. If you have any specific questions about the process, feel free to ask!"},
+             {"role": "user", "content":"How to contact IQ Canada?"},
+             {"role": "assistant", "content":"CALL US: +1 416 915 4230 | E-MAIL US: info@iqcanada.ca"},
+             {"role": "user", "content": "How does IQ Canada assess the feasibility of my business idea for success in Canada?"},
+             {"role": "assistant", "content": "IQ Canada conducts Concept Validation to evaluate the feasibility of your business idea, ensuring its potential for success in the Canadian market."},  
+             {"role": "user", "content": "What market insights does IQ Canada provide for my product or service in Canada?"},
+             {"role": "assistant", "content": "With deep insights into the Canadian market, IQ Canada ensures your product or service meets the right audience and fulfills the market demand."},  
+             {"role": "user", "content": "How does IQ Canada help in penetrating the Canadian market effectively?"},
+             {"role": "assistant", "content": "IQ Canada crafts bespoke Go-To-Market Strategies, allowing your business to penetrate the Canadian market effectively and efficiently."},  
+             {"role": "user", "content":prompt}
+             ]+ch
+         )
+  return(response.choices[0].message.content)
 
 def create_startup_visa_chatbot():
     startup_questions = [
-        "What is the eligibility criteria for the startup visa program (SUV)?",
-        "How many co-founders are allowed to apply for a startup visa together?",
-        "Can I apply for a startup visa if I don't meet the age or education threshold?",
-        "What are the language requirements for the startup visa program?",
-        "How do I qualify for applying for a startup visa?",
-        "What is a Letter of Support in the context of the startup visa program?",
-        "How does the startup visa program support businesses in Canada?",
-        "What are the steps required to apply for Permanent Residency under the startup visa program?",
-        "What is the processing time for the startup visa program?",
-        "Why should you think of coming to Canada under the Startup Visa Program?",
-        "Why is Ontario considered a preferred destination for startups?",
-        "Can I apply for a startup visa if my business is not yet incorporated in Canada?",
-        "What are the fees charged by designated organizations for the startup visa program?",
-        "How can I find out if my business is considered innovative for the startup visa program?",
-        "Are there any government programs that support new startups in Canada?",
-        "What are the requirements for proof of personal settlement funds when applying for a startup visa?",
-        "Can I include family members in my startup visa application, and what are the requirements for them?",
-        "How can I secure a Letter of Support from a designated organization for my startup visa application?",
-        "Are there restrictions on the type of business that qualifies for a startup visa?",
-        "What is the role of venture capital funds, angel investor groups, and business incubators as designated organizations?",
-        "Is there a specific minimum investment requirement from designated organizations to qualify for a startup visa?",
-        "How long does it take to get a response after applying to a designated organization?",
-        "What are the benefits of obtaining Canadian Permanent Residency through the startup visa program?",
-        "Can I apply for a startup visa if I already have a business established in another country?",
-        "How does the Global Talent Stream in Ontario facilitate access to tech talent for entrepreneurs?",
-        "Are there specific industries or sectors that the startup visa program prioritizes?",
-        "What role does innovation play in the assessment of a startup's eligibility for the visa program?",
-        "How does the startup visa program contribute to job creation in Canada?",
-        "Are there any restrictions on the nationality of founders applying for a startup visa?",
-        "Can a startup with a focus on sustainable or social impact qualify for the visa program?",
-        "How does the startup visa program evaluate the innovative nature of a business idea?",
-        "Can a startup visa holder bring existing employees from their home country to work in the Canadian business?",
-        "What role does the business plan play in the startup visa application process?",
-        "Are there specific requirements for demonstrating the potential to create jobs for Canadians in the startup visa application?",
-        "How does the startup visa program handle partnerships and collaborations with other businesses?",
-        "Can an entrepreneur who previously had a startup in another country apply for a startup visa in Canada?",
-        "What support does the Canadian government offer to startups beyond the startup visa program?",
-        "Are there any specific requirements for startups in the technology sector applying for a visa?",
-        "How does the startup visa program assess the market viability of a business idea?",
-        "Can a startup visa holder sponsor family members for Canadian Permanent Residency?",
-        "What happens if a designated organization withdraws its support after providing a Letter of Support?",
-        "How does the startup visa program contribute to the growth of the Canadian tech industry?",
-        "Can a startup visa holder apply for additional permits for employees hired in Canada?",
-        "What role do language proficiency requirements play in the startup visa application?",
-        "How does the Canadian government ensure compliance with the job creation commitments made by startup visa holders?",
-        "Can a startup visa holder apply for Canadian citizenship immediately upon obtaining Permanent Residency?",
-        "What documentation is required to demonstrate control of intellectual property/assets within the business?",
-        "How does the startup visa program facilitate networking and collaboration among entrepreneurs?",
-        "Are there any specific criteria for measuring the global competitiveness of a startup under the program?",
-        "Can a startup visa holder apply for permanent residency if their business fails to meet the specified criteria?",
-        "What is a Designated Organization?",
-        "How does IQ Canada help startup businesses?",
-        "What are the instructions for obtaining Proof of Settlement Funds Letter from the bank",
-        "What are the funds required in Canadian dollars for family members?",
-        "What is the minimum necessary income required according to size of family unit?",
-        "What is the application process for the Start-up Visa Program?",
-        "What is the difference between support from venture capital funds, angel investor groups, and business incubators?",
-        "Who will review my Start-up Visa Program application?",
-        "What is an essential person?",
-        "Why is there a different minimum investment from a venture capital fund and an angel investor group?",
-        "Do I have to invest my own money if I want to apply through the Start-up Visa Program?",
-        "What happens if I receive investment support from more than one designated organization?",
-        "How much money is required for Canada startup visa?",
-        "How to apply for a startup visa?",
-        "What is the success rate of startup visa in Canada?",
-        "List of Designated Organizations/Venture Capital funds/Angel Investor Groups/Business incubators?",
-        "What specific qualifications or experience should co-founders possess to enhance the chances of a successful startup visa application?",
-        "Can a startup with a physical presence outside of Canada still be eligible for the Startup Visa Program?",
-        "What happens if there are changes in the ownership structure or leadership team after receiving the startup visa?",
-        "Can a startup that has previously received funding or support from non-designated organizations still apply for the visa program?",
-        "Are there specific requirements for the business plan, and what key elements should it include to strengthen the application?",
-        "How does the Startup Visa Program handle intellectual property rights and protection for innovative business ideas?",
-        "Can a startup visa holder switch to a different business idea or industry after obtaining Permanent Residency?",
-        "What role does the province or territory play in the Startup Visa Program, and are there specific advantages to choosing a particular location?",
-        "Can an entrepreneur who has previously applied for other Canadian immigration programs still apply for the Startup Visa Program?",
-        "How does the Startup Visa Program contribute to diversity and inclusion in the Canadian entrepreneurial ecosystem?",
-        "Can a startup visa holder pursue additional education or training while running their business in Canada?",
-        "What support is available for startups in the post-approval phase of the visa program?",
-        "Are there any tax incentives or benefits for startups that go through the Startup Visa Program?",
-        "How does the program handle situations where a designated organization goes out of business or is no longer able to provide support?",
-        "Can a startup visa holder sell their business and still maintain their Permanent Residency status in Canada?",
-        "Are there specific criteria or benchmarks that a startup must meet to demonstrate its potential for scalability and growth?",
-        "What role does the startup ecosystem in Canada play in supporting and integrating startup visa holders?",
-        "How does the Startup Visa Program accommodate businesses in emerging or unconventional industries?",
-        "Are there any restrictions on the use of funds obtained through designated organizations for the startup?",
-        "Can a startup visa holder bring in foreign partners or collaborators to contribute to the business?",
-        "What steps should an entrepreneur take if they experience challenges or setbacks in meeting the job creation targets outlined in their business plan?",
-        "How does the program handle situations where the business pivot is necessary for the startup's survival or success?",
-        "Can a startup visa holder apply for additional funding or support from designated organizations after the initial approval?",
-        "Are there any specific tax obligations or considerations for startup visa holders operating in Canada?",
-        "How does the program address concerns related to the competitive landscape and market saturation in specific industries?",
-        "Can a startup visa holder participate in other entrepreneurial activities or ventures outside of their designated business?",
-        "What happens if a designated organization provides a Letter of Support but later disagrees with the direction or management of the startup?",
-        "Are there specific requirements for startups in the healthcare or biotechnology sectors applying for the visa program?",
-        "Can a startup visa holder hire foreign workers to contribute to the growth of their business in Canada?",
-        "How does the program handle situations where a startup is acquired by another company?",
-        "Are there any restrictions on the types of investments that can be made by designated organizations in startups?",
-        "How does the program address concerns related to the sustainability and long-term viability of a startup?",
-        "Can a startup visa holder apply for additional permits for international employees who are crucial to the business's success?",
-        "What resources are available to help startup visa holders integrate into the Canadian business community and culture?",
-        "How does the Startup Visa Program handle partnerships with research institutions or universities for innovative startups?",
-        "Can a startup visa holder relocate their business to a different province or territory within Canada after obtaining Permanent Residency?",
-        "What role does the startup community play in supporting newcomers through networking events and collaborative initiatives?",
-        "Are there any specific measures in place to protect against fraud or misrepresentation in the startup visa application process?",
-        "How does the program support startups in rural or remote areas of Canada, away from major urban centers?",
-        "Can a startup visa holder take a temporary leave from their business without jeopardizing their immigration status?",
-        "What avenues are available for dispute resolution between co-founders or with designated organizations during the application process?",
-        "How does the program account for external factors such as economic downturns or market fluctuations that may impact startups?",
-        "Can a startup visa holder sponsor skilled international workers through other immigration programs?",
-        "How does the program encourage collaboration and knowledge-sharing among startups within the same industry or sector?",
-        "Are there specific criteria for demonstrating the potential for international market expansion for a startup?",
-        "Can a startup visa holder access government grants or funding programs to further support their business growth?",
-        "How does the program address concerns related to the protection of sensitive business information and trade secrets?",
-        "Can a startup visa holder participate in accelerator programs or business competitions to further develop their business?",
-        "What role does the Startup Visa Program play in fostering innovation in traditional industries or sectors?",
-        "Can a startup visa holder apply for a work permit for a key employee who is not eligible for permanent residency?",
-        "How does the program assess the impact of a startup on the local community and economy?",
-        "Are there specific initiatives or resources to support startups led by underrepresented groups, such as women or minorities?",
-        "Can a startup visa holder apply for additional funding from other sources after the initial investment from a designated organization?",
-        "How does the program handle situations where a startup pivots its business model or focus after receiving approval?",
-        "What are the documents required for application/ document checklist?",
-        "How will the barcode or QR code system be implemented on the EE Energy platform?",
-        "What technology implementations will the EE Energy platform use for inventory forecast and purchase prediction?",
-        "How will the platform ensure the approval and onboarding of pre-vetted retailers/distributors onto the marketplace?",
-        "What type of support system will be available for customers encountering issues while browsing, searching, and purchasing spare parts?",
-        "How will the platform record shipping and delivery information for products?",
-        "What steps will be taken to implement a feedback system for buyers to report issues or concerns with spare parts received?",
-        "How will the platform handle the acceptance of bids from customers/buyers and the dedicated RFQ portal for submitting quotes for specific mechanical parts, spare parts, and pumps?",
-        "What analytics and reporting capabilities will be integrated into the marketplace to track customer behavior, product performance, and revenue generation?",
-        "What insights will the data analysis tools and algorithms provide for predicting inventory needs based on past sales data?",
-        "How will the platform facilitate the listing of the available catalog of pumps and other mechanical spare parts for the buyers' reference?"
-    ]
-
+    "What is the current market scenario/key trends in the market?",
+	"What is the contact/email for IQ Canada?",
+	"Where is IQ Canada's office?",
+	"Template for Completion Checklist?",
+	"How do I find out if my business is innovative?",
+	"What are the fees charged by Designated Organizations?",
+	"How do you help to launch my business in Canada?",
+	"Who are some of your clients?",
+	"What is your success rate?",
+	"Contact for Proof of Settlements of Funds?",
+	"Does IQ Canada have experience or expertise in supporting startups within the Oil & Gas and Energy sector?",
+	"How can IQ Canada help ensure that my startup complies with all the relevant regulations and requirements in the industry in Canada?",
+	"Can IQ Canada provide insights or support in conducting market research for the specified industry to ensure a strong understanding of the competitive landscape and potential market challenges?",
+	"Does IQ Canada have knowledge or partnerships with technology providers, to support the development of the platform?",
+	"How can IQ Canada assist in refining and optimizing the business model considering the unique challenges and opportunities in the industry?",
+	"What legal services does IQ Canada offer to ensure the proper setup of contracts, agreements, and partnerships, especially in a complex industry?"]
     startup_answers = [
-        "To be eligible for Canada's Start-up Visa Program, entrepreneurs must have the skills and potential to build businesses in Canada that are innovative, can create jobs for Canadians, and can compete on a global scale. Additionally, they must have the support of one of the designated organizations, such as a venture capital fund or business incubator, and meet other requirements such as proof of personal settlement funds, intent to incorporate a business in Canada, control of IP/assets within the business, and English proficiency (CLB 5). There is no age or education threshold, and up to 5 founders in a startup are allowed.",
-        "Up to 5 founders in a startup are allowed to apply for Canada's Start-up Visa Program together. Each applicant must hold at least 10% of the voting rights in the business, and all applicants combined must hold over 50% of the voting rights.",
-        "The startup visa program does not have age or education thresholds, providing flexibility for a diverse range of entrepreneurs.",
-        "Language requirements include meeting a minimum CLB 5 in all four language abilities: reading, writing, speaking, and listening.",
-        "To qualify for the Start-up Visa Program, you must meet eligibility criteria, secure a Letter of Support from a designated organization, meet language requirements, have sufficient settlement funds, and pass security and medical clearances.",
-        "In the context of the Start-up Visa Program, a Letter of Support is a document provided by a designated organization that supports the entrepreneur's business idea and confirms that the organization is investing in or supporting the business.",
-        "Canada's Start-up Visa Program supports innovative businesses in Canada by providing access to a talented pool of individuals, government support for innovation, and a direct pathway to immigration in Canada.",
-        "The steps include preparing a pitch deck, submitting the application to a designated organization, undergoing interviews, signing an agreement, paying required fees, obtaining a Letter of Support, and submitting the application for permanent residency and work permit.",
-        "The processing time for the startup visa program can vary, with a general waiting period of 18 months to 3 years for the final decision on an application.",
-        "The Startup Visa program is intended to attract international entrepreneurs who wish to establish new, scalable businesses in Canada which will support innovation and job creation.",
-        "Ontario is a preferred destination for entrepreneurs due to its strategic location, economic strength, AI innovation hub, and quick access to tech talent through the Global Talent Stream.",
-        "Yes, you can apply for a startup visa even if your business is not yet incorporated in Canada.",
-        "Fees charged by designated organizations can range between $25,000 and $50,000, with specific amounts for organizations like TiE Toronto.",
-        "To determine if your business is innovative, consider factors like uniqueness, market disruption potential, technology use, intellectual property, and scalability.",
-        "Yes, there are over 150 government programs that support new and innovative startups in Canada, including SR&ED and iRAP.",
-        "Proof of personal settlement funds is required to demonstrate that you have the financial means to support yourself and your family members when you arrive in Canada.",
-        "Family members can be included in the startup visa application, and requirements for them include meeting security and medical clearances.",
-        "To secure a Letter of Support, demonstrate strong market validation and scalability. Work with specialized business consultants for idea development and validation.",
-        "The startup visa program does not impose restrictions on the type of business, but it must be innovative, have job creation potential, and compete globally.",
-        "Designated organizations, such as venture capital funds, angel investor groups, and business incubators, play a crucial role by providing a Letter of Support to endorse and support the entrepreneur's business idea.",
-        "While there's no specific minimum investment requirement, the financial support provided by designated organizations can vary.",
-        "Response times from designated organizations can vary, and it's advisable to check with each organization individually for their specific timelines.",
-        "Benefits of obtaining Canadian Permanent Residency include the ability to live and work in Canada, access to government programs supporting startups, and opportunities for business growth.",
-        "Yes, you can apply for a startup visa even if you have a business established in another country. The startup must, however, be incorporated in Canada.",
-        "The Global Talent Stream in Ontario allows employers to receive Labor Market Impact Assessments in ten business days, facilitating faster access to tech talent.",
-        "While the startup visa program is open to various industries, Ontario's focus on AI and its large talent pool makes it particularly attractive for tech startups.",
-        "Innovation is a key factor in the assessment of a startup's eligibility. The business should offer a unique product or service, disrupt the market, use emerging technology, have intellectual property protection, and demonstrate scalability.",
-        "The startup visa program contributes to job creation by attracting innovative entrepreneurs who establish and grow businesses, leading to increased employment opportunities.",
-        "There are no restrictions on the nationality of founders applying for a startup visa. The program is open to international entrepreneurs.",
-        "Yes, a startup with a focus on sustainable or social impact can qualify for the visa program. Innovation in addressing social or environmental challenges is highly valued.",
-        "The evaluation of the innovative nature of a business idea includes factors like uniqueness, market disruption potential, use of emerging technology, intellectual property, and scalability.",
-        "Yes, a startup visa holder can bring existing employees to work in the Canadian business, contributing to the job creation aspect.",
-        "The business plan is a crucial component of the startup visa application process, outlining the vision, mission, market strategy, and financial projections.",
-        "Specific requirements for demonstrating job creation potential often involve detailing the roles and responsibilities of prospective hires, contributing to the Canadian job market.",
-        "Partnerships and collaborations are viewed positively, showcasing the potential for networking and industry integration.",
-        "Yes, an entrepreneur with previous startup experience in another country can apply for a startup visa in Canada.",
-        "Beyond the startup visa program, the Canadian government offers various support programs, grants, and resources to foster startup growth.",
-        "While there are no specific requirements for sectors, technology startups are encouraged, given their potential for innovation and global competitiveness.",
-        "Market viability is assessed by examining market research, target audience analysis, and the potential demand for the product or service.",
-        "Yes, a startup visa holder can sponsor eligible family members for Canadian Permanent Residency.",
-        "If a designated organization withdraws support after providing a Letter of Support, the entrepreneur may need to seek support from an alternative designated organization.",
-        "The startup visa program contributes to the growth of the Canadian tech industry by attracting and supporting innovative tech startups.",
-        "Startup visa holders can apply for additional permits, such as work permits, for employees hired in Canada.",
-        "Language proficiency requirements, typically at CLB 5, ensure effective communication and integration into the Canadian business environment.",
-        "Compliance with job creation commitments is monitored, and startups failing to meet criteria may face consequences, including potential visa revocation.",
-        "While obtaining Permanent Residency is a step toward citizenship, there are specific residency and time requirements for Canadian citizenship.",
-        "Documentation demonstrating control of intellectual property/assets includes patents, trademarks, or copyrights protecting the startup's product or service.",
-        "The startup visa program facilitates networking and collaboration through events, mentorship programs, and connections with industry experts.",
-        "Global competitiveness is measured by assessing the startup's potential to compete on an international scale.",
-        "A startup visa holder can apply for permanent residency, even if the business faces challenges, but individual cases may vary.",
-        "The Start-up Visa Program requires applicants to secure a Letter of Support from a designated organization. Designated organizations are business groups that have been approved by the Canadian government to invest in or support start-ups through the Start-up Visa Program. These organizations include venture capital funds, angel investor groups, and business incubators.",
-        "IQ Canada helps startup businesses through concept validation, market research, go-to-market strategies, comprehensive business plans, pitch development, intellectual property strategy, designated entity access, corporate structuring, business networks, and funding partners.",
-        "The letter for Proof of Settlement Funds should be printed on the bank’s letterhead with contact information included. The original signature should be provided at the bottom. For questions, contact Upasana Sharma at usharma@iqcanada.ca.",
-        "The funds required in Canadian dollars for family members vary based on the number of family members, ranging from $13,310 for one family member to $35,224 for seven family members, with an additional $3,586 for each extra family member.",
-        "The minimum necessary income required according to the size of the family unit varies, ranging from $26,620 for one person to $70,448 for seven persons, with an additional $7,172 for each additional person.",
-        "First, you must pitch your business idea to a designated organization and convince it to support your start-up company. Once a designated organization decides to support your business, it will send us a commitment certificate and give you a letter of support. The process to pitch your idea varies for each designated organization. You must contact the designated organization to find out what you must do to seek its support. If you meet all eligibility criteria, you can submit a completed application, which must include your letter of support.",
-        "To get support from a venture capital fund or an angel investor group, you need a sizable investment from them. To get support from a business incubator, you must be accepted into a designated Canadian business incubator program. Getting into these programs is a competitive process with limited spots available. Contact a designated organization to find out how to get their support.",
-        "First, the designated organization(s) that you seek support from will review the viability of your business proposal. Next, Immigration, Refugees and Citizenship Canada will review your immigration application, if you have received the necessary support to apply, to make sure you’re eligible to become a permanent resident. Finally, your application may also be subject to an independent peer review process. This is designed to protect against fraud and to ensure that your activities and those of the designated organization are in line with industry standards for this type of support.",
-        "An essential person is critical to the proposed start-up. Without this person, the designated organization would not invest or support the proposal. If we refuse the application of an essential person, all related applicants will be refused.",
-        "Angel investors usually invest their own money into a start-up business. Venture capital funds are limited partnerships that have a fund of pooled investment capital to invest in several companies. Also, angel investor groups invest in companies at an earlier stage of development, compared to venture capital funds. Minimum investment amounts are determined based on consultation with industry associations and represent typical investment amounts in each industry.",
-        "No, you’re not required to invest any of your own money. The minimum investment required is an investment that comes from a designated Canadian venture capital fund or angel investor group.",
-        "Receiving support from multiple designated venture capital funds or angel investor groups is known as syndication. If you have syndicated support, then all investment organizations involved in the syndication must be identified. Only one commitment certificate will be sent electronically to us and one letter of support will be provided to you. If a designated venture capital fund invests in your business, the minimum total investment amount is $200,000, even if a designated angel group also invests in your business. If at least one designated angel group but no designated venture capital fund invests in your business, the minimum total investment amount is $75,000.",
-        "Those who meet the eligibility requirements must secure a minimum of $75,000 from a Canadian angel investor, or a minimum of $200,000 from a Canadian venture capital fund recognized by the government of Canada.",
-        "To apply for a startup visa, fill out the application form, complete the document checklist, pay your application fees, and submit your application. Ensure that it is complete, signed, and includes all supporting documents. The envelope should be labeled 'start-up visa' and mailed to the appropriate address.",
-        "IRCC states that the SUV program has a general success rate of above 75%.",
-        "Here is a list of designated organizations, venture capital funds, angel investor groups, and business incubators: Venture Capital Funds: 7 Gate Ventures, Alt Ventures, Apex Innovative Investments Ventures, Arete Pacific Tech Ventures (VCC) Corp, BCF Ventures, BDC Venture Capital, Celtic House Venture Partners, Extreme Venture Partners LLP, First Fund, Golden Venture Partners Fund, LP, INP Capital, iNovia Capital Inc., Intrinsic Venture Capital, Lumira Ventures, Invest Nova Scotia, PRIVEQ Capital Funds, Real Ventures, Red Leaf Capital Corp, Relay Ventures, ScaleUp Venture Partners, Inc., Tangentia Ventures, Top Renergy Inc., Vanedge Capital Limited Partnership, Version One Ventures, WhiteHaven Venture, Westcap Management Ltd., Yaletown Venture Partners Inc., York Entrepreneurship Development Institute (YEDI) VC Fund,  Angel Investor Groups: Canadian International Angel Investors, Ekagrata Inc., Golden Triangle Angel Network, Keiretsu Forum Canada, Oak Mason Investments Inc., TenX Angel Investors Inc., VANTEC Angel Network Inc., York Angel Investors Inc., Business Incubators: Alacrity Foundation, Alberta Agriculture and Forestry, Agrivalue Processing Business Incubator, Food Processing Development Centre, Alberta IoT Association, Altitude Accelerator, Bhive, Biomedical Commercialization Canada Inc. (operating as Manitoba Technology Accelerator), Brilliant Catalyst, Creative Destruction Lab, DMZ Ventures, Empowered Startups Ltd., Extreme Innovations, Foresight Cleantech Accelerator Centre, Genesis Centre, Highline BETA Inc., Invest Nova Scotia, Innovate Calgary, Innovation Cluster - Peterborough and the Kawarthas, Innovation Factory, Interactive Niagara Media Cluster o/a Innovate Niagara, Intrinsic Innovations, Invest Ottawa, ISM Arts & Culture Ltd, Knowledge Park o/a Planet Hatch, LatAm Startups, Launch Academy - Vancouver, LaunchPad PEI Inc., Millworks Centre for Entrepreneurship, NEXT Canada, Niagara Business & Innovation Fund, North Forge East Ltd., North Forge Technology Exchange, Pacific Technology Ventures, Platform Calgary, Pycap, Real Investment Fund III L.P. o/a FounderFuel, Red Leaf Capital Corp, Roseview Global Incubator, Spark Commercialization and Innovation Centre, Spring Activator, The DMZ at Ryerson University, Think8 Global Institute, TiE Toronto, Toronto Business Development Centre (TBDC), Treefrog, TSRV Canada Inc. (operating as Techstars Canada), University of Toronto Entrepreneurship Hatchery, ventureLAB Innovation Centre, VIATEC, Waterloo Accelerator Centre, York Entrepreneurship Development Institute, YSpace (York University)",
-        "To enhance the chances of a successful application, co-founders should ideally possess a strong entrepreneurial background, relevant industry experience, and a proven track record of success. Demonstrating a history of successfully launching and managing startups can significantly strengthen the application.",
-        "Yes, a startup with a physical presence outside of Canada can still be eligible for the Startup Visa Program. However, the business must intend to operate in Canada, and a significant portion of its operations and job creation should occur within the country.",
-        "If there are changes in the ownership structure or leadership team after receiving the startup visa, it is crucial to inform the designated organization that provided the Letter of Support. Depending on the nature of the changes, the government may reassess the eligibility of the startup.",
-        "Startups that have received funding or support from non-designated organizations are still eligible to apply for the Startup Visa Program. However, the primary support for the visa application should come from a designated organization.",
-        "The business plan should outline the startup's goals, market strategy, financial projections, and the innovative aspects of the business. A comprehensive and well-researched business plan strengthens the application.",
-        "The Startup Visa Program does not have specific provisions for intellectual property rights. Entrepreneurs are responsible for protecting their intellectual property, and standard Canadian laws and processes apply.",
-        "While the focus is on the initially approved business idea, entrepreneurs can make changes with the approval of the designated organization. Major changes may require reassessment by immigration authorities.",
-        "Provinces and territories do play a role, and choosing a specific location can have advantages. Some provinces may have additional programs or incentives for startups. Researching regional opportunities is recommended.",
-        "Yes, entrepreneurs who have previously applied for other Canadian immigration programs can still apply for the Startup Visa Program, provided they meet the program's requirements.",
-        "The Startup Visa Program aims to contribute to diversity and inclusion by attracting entrepreneurs from around the world. The program values a diverse range of skills, experiences, and perspectives in the Canadian entrepreneurial ecosystem.",
-        "Startup visa holders can pursue additional education or training while running their business in Canada. However, the primary focus should be on actively managing and growing the startup.",
-        "Designated organizations may continue to provide support in the post-approval phase, offering resources, networking opportunities, and guidance as entrepreneurs establish and expand their businesses.",
-        "While there are no specific tax incentives tied to the Startup Visa Program, startups in Canada may benefit from general tax incentives and credits available to businesses.",
-        "In such cases, the startup may need to find an alternative designated organization to maintain eligibility. Communication with immigration authorities is essential to address any changes in the support structure.",
-        "Startup visa holders can sell their business and maintain their Permanent Residency status in Canada. However, they should continue to meet the program requirements, and any significant changes should be communicated to immigration authorities.",
-        "The startup should demonstrate its potential for scalability and growth through a well-defined business model, a large addressable market, and innovative solutions. Key benchmarks may include market traction, revenue projections, and a clear plan for expansion.",
-        "Canada's startup ecosystem plays a crucial role in supporting and integrating startup visa holders. It provides access to mentorship, networking opportunities, funding, and collaborative environments, fostering a supportive community for entrepreneurs.",
-        "The Startup Visa Program accommodates businesses in emerging or unconventional industries, recognizing that innovation can arise in various sectors. The key is to demonstrate the potential for economic growth, job creation, and innovation in the chosen industry.",
-        "There are generally no specific restrictions on the use of funds obtained through designated organizations. However, funds should be used to support the growth and development of the startup, aligning with the objectives outlined in the business plan.",
-        "Yes, a startup visa holder can bring in foreign partners or collaborators to contribute to the business. Collaborative efforts can enhance the startup's capabilities and increase its chances of success.",
-        "If challenges or setbacks arise in meeting job creation targets, communication with the designated organization and immigration authorities is essential. Providing a revised plan or seeking guidance on overcoming obstacles may be necessary.",
-        "The program acknowledges that business pivots may be necessary for a startup's survival or success. Entrepreneurs should communicate such changes to the designated organization and immigration authorities, ensuring transparency in the process.",
-        "Yes, a startup visa holder can apply for additional funding or support from designated organizations after the initial approval. The key is to demonstrate the need for additional resources to achieve the business's objectives.",
-        "Startup visa holders are subject to the standard tax obligations for businesses operating in Canada. They should comply with federal and provincial tax regulations, and seeking professional advice is recommended.",
-        "The program evaluates startups based on their potential to contribute to the Canadian economy. Entrepreneurs should highlight unique value propositions, market differentiators, and strategies to navigate competition and saturation in their industries.",
-        "While the primary focus should be on the designated business, entrepreneurs can participate in other entrepreneurial activities or ventures outside of their designated business. However, they should ensure that these activities do not compromise their commitment to the startup visa requirements.",
-        "If a designated organization disagrees with the direction or management of the startup after providing a Letter of Support, communication and collaboration are crucial. Open dialogue and, if needed, involving immigration authorities can help resolve disputes.",
-        "Startups in the healthcare or biotechnology sectors should meet the general program requirements. Additionally, they should demonstrate how their innovations contribute to advancements in these fields and align with the program's objectives.",
-        "Yes, a startup visa holder can hire foreign workers to contribute to the growth of their business in Canada. However, the hiring process should comply with Canadian immigration and labor regulations.",
-        "If a startup is acquired by another company, the new ownership structure should be communicated to the designated organization and immigration authorities. The startup visa holder may need to provide updated information and possibly undergo reassessment.",
-        "There are no specific restrictions on the types of investments that designated organizations can make in startups. However, the investments should align with the objectives of the Startup Visa Program.",
-        "The program addresses concerns related to the sustainability and long-term viability of a startup through the ongoing support provided by designated organizations. Regular communication and updates on the business's progress are essential.",
-        "Yes, a startup visa holder can apply for additional permits for international employees who are crucial to the business's success. This may involve obtaining work permits for key personnel.",
-        "Various resources are available to help startup visa holders integrate into the Canadian business community and culture. These may include networking events, mentorship programs, and support services offered by designated organizations and the broader startup ecosystem.",
-        "The Startup Visa Program encourages partnerships with research institutions or universities for innovative startups. Collaborations can enhance the innovative nature of the business and contribute to the growth of the Canadian knowledge economy.",
-        "Yes, a startup visa holder can relocate their business to a different province or territory within Canada after obtaining Permanent Residency. However, they should inform immigration authorities and ensure compliance with any provincial regulations or incentives.",
-        "The startup community plays a vital role in supporting newcomers through networking events and collaborative initiatives. These events facilitate connections, knowledge-sharing, and the integration of startup visa holders into the broader entrepreneurial ecosystem.",
-        "The program employs rigorous screening processes and verification measures to protect against fraud or misrepresentation in the startup visa application process. Applicants are expected to provide accurate and truthful information, and any fraudulent activity may result in application rejection or revocation of status.",
-        "The program recognizes the importance of supporting startups in rural or remote areas and encourages their participation. Designated organizations may play a key role in providing resources, mentorship, and connections to help startups thrive outside major urban centers.",
-        "Startup visa holders may take temporary leaves from their business without jeopardizing their immigration status, but it's advisable to inform designated organizations and immigration authorities to ensure compliance with program requirements.",
-        "Dispute resolution between co-founders or with designated organizations during the application process may involve communication, mediation, or legal intervention if necessary. Clear documentation and agreements can help prevent and address disputes.",
-        "The program acknowledges external factors like economic downturns or market fluctuations that may impact startups. Flexibility and communication with designated organizations and immigration authorities are essential during challenging times.",
-        "Startup visa holders can sponsor skilled international workers through other immigration programs, such as the Temporary Foreign Worker Program or the International Mobility Program. Compliance with relevant immigration regulations is necessary.",
-        "The program encourages collaboration and knowledge-sharing among startups within the same industry or sector through networking events, industry associations, and initiatives that foster a culture of innovation and cooperation.",
-        "Criteria for demonstrating the potential for international market expansion include a well-defined market entry strategy, global market demand, and a clear plan for scaling operations beyond Canada. Designated organizations may provide guidance on meeting these criteria.",
-        "Startup visa holders can access government grants or funding programs available to businesses in Canada. These programs may provide additional financial support to further facilitate business growth.",
-        "While there are no specific provisions in the program, standard legal and business practices apply for the protection of sensitive business information and trade secrets. Entrepreneurs should implement appropriate measures to safeguard their intellectual property.",
-        "Yes, startup visa holders can participate in accelerator programs or business competitions to further develop their business. Such participation can enhance visibility, attract investment, and provide valuable resources for growth.",
-        "The Startup Visa Program actively fosters innovation in traditional industries or sectors by welcoming startups with innovative approaches, technologies, or business models that contribute to the modernization and competitiveness of these industries.",
-        "Startup visa holders can apply for a work permit for a key employee who is not eligible for permanent residency. The hiring process should comply with Canadian immigration regulations.",
-        "The program assesses the impact of a startup on the local community and economy by considering factors such as job creation, economic contributions, and community engagement. Designated organizations may play a role in evaluating these impacts.",
-        "Initiatives and resources exist to support startups led by underrepresented groups, including women or minorities. These may include mentorship programs, funding opportunities, and networking events specifically tailored to promote diversity in entrepreneurship.",
-        "Yes, a startup visa holder can apply for additional funding from other sources after the initial investment from a designated organization. Diversifying funding sources can contribute to the financial stability and growth of the startup.",
-        "If a startup pivots its business model or focus after receiving approval, it should communicate these changes to designated organizations and immigration authorities. Transparency and cooperation are key to ensuring continued compliance with program requirements.",
-        "The documents required are: 1. Business plan, 2. Letter of Support, 3. Commitment certificate, 4. Proof of Investment, 5. Language proficiency, 6. Education Credential Assessment(ECA), 7. Net worth statements, 8. Police clearance certificates, 9. Passport and travel documents, 10. Passport Sized Photographs, 11. Application forms inclcuding the IMM 5760 Business Immigration Start-Up Business Class., 12. Proof of Settlement funds, 13. Medical examination, 14. Travel History, 15. Resume/CV, 16. Family information, 17. Additional documents. It's important to note that the specific requirements may vary, and it's advisable to check the official website of Immigration, Refugees, and Citizenship Canada (IRCC) for the most up-to-date information and detailed instructions for the Start-Up Visa program.",
-        "The barcode or QR code system will be implemented on the EE Energy platform by enabling the scanning and recording of product information, including unique identifiers and product data sheets, into a database for efficient tracking and management.",
-        "The EE Energy platform will utilize advanced technology implementations for inventory forecast and purchase prediction, leveraging data analysis tools and algorithms to analyze past sales data. These insights will help in identifying customer behavior trends and predicting future demand to optimize inventory management.",
-        "The platform will ensure the approval and onboarding of pre-vetted retailers and distributors onto the marketplace by providing advanced e-commerce functionalities. This will enable the customers to identify the right spare parts and pumps crucial for their operations and raise bids for the required quantity from the available inventory.",
-        "A support system will be available for customers encountering issues while browsing, searching, and purchasing spare parts. This system aims to provide assistance and address any concerns that users may face during their interaction with the platform.",
-        "The shipping and delivery information for products will be recorded on the EE Energy platform, including carrier details, tracking numbers, and delivery dates. This will enable the effective tracking of product movement from the manufacturer to the end user.",
-        "The platform will implement a feedback system that allows buyers to report any issues or concerns with the spare parts they receive. This feedback will help in identifying quality issues or defects in the spare parts, allowing the supplier to take corrective action.",
-        "The EE Energy platform will handle the acceptance of bids from customers and feature a dedicated RFQ portal for submitting quotes for specific mechanical parts, spare parts, and pumps. This process will facilitate efficient tendering and deal closure between customers and the empaneled retailers/distributors.",
-        "The platform will integrate robust analytics and reporting capabilities to track customer behavior, product performance, and revenue generation. This data-driven approach will provide valuable insights for optimizing business operations and sales strategies.",
-        "The advanced data analysis tools and algorithms integrated into the marketplace will provide insights for predicting inventory needs based on past sales data. These insights will aid in determining the appropriate inventory levels and optimizing stock management.",
-        "The EE Energy platform will facilitate the listing of the available catalog of pumps and other mechanical spare parts for the buyers' reference, allowing easy access and navigation through the comprehensive range of products offered on the marketplace."
-    ]
-
+	"The Canadian startup ecosystem is thriving, marked by a surge in innovative companies across sectors. The government actively supports startups through funding, accelerators, and tax incentives, fostering a favorable environment that attracts global talent and investment. Key trends include the transformative impact of Artificial Intelligence (AI) and Machine Learning (ML), the rising value of data analytics, disruptive advancements in Fintech, technological innovations in Health Tech for improved healthcare, and the significant role startups play in addressing environmental challenges through sustainability solutions. IQ Canada is dedicated to aiding Canadian startups in navigating this dynamic market, emphasizing innovation and entrepreneurship as drivers for economic growth and social progress.",
+	"CALL US: +1 416 915 4230 | E-MAIL US: info@iqcanada.ca",
+	"ADDRESS: 100 King St W Suite 5700, Toronto, ON M5X 1C7, Canada",
+	"A template checklist outlines the typical steps involved in completing a series A investment transaction, starting from signing to completion. The items are examples, and individuals creating their checklist should refer to key transaction documents, including a subscription agreement, shareholders' agreement, and a new constitution. The checklist is not exhaustive and excludes certain complexities like a rolling close, investment tranches, or conversion of debt or convertible notes. Reach out to IQ Canada's support team for additional information on the completion checklist.",
+	"To determine if a business is innovative, consider factors such as uniqueness, potential market disruption, use of new technology, intellectual property protection, and scalability. If the business meets one or more of these criteria, it may be considered innovative. However, the final determination rests with the designated organization providing a Letter of Support.",
+	"Fees can range between $25,000 and $50,000. TiE Toronto fees are $25,000.",
+	"Launching a business in Canada with IQ Canada involves a systematic six-phase approach. In the first phase, they provide startup visa advisory services, transforming clients' ideas into viable business propositions, offering market intelligence, creating plans, and assisting in the visa application process. The second phase focuses on developing a go-to-market plan, defining target markets, engaging with stakeholders, and establishing a digital presence. In the third phase, IQ Canada helps companies build Minimum Viable Products (MVPs) and prototypes with a strong emphasis on UI/UX design and quality assurance. The fourth phase involves identifying and screening investors, coaching clients for presentations, and managing fundraising due diligence. In the fifth phase, IQ Canada guides clients through the startup visa designated entry process, leveraging their expertise in the Canadian startup ecosystem. The final phase includes incorporating the Canadian business and protecting intellectual property through collaboration with leading law firms, facilitating the entire incorporation process, and assisting in filing patents, trademarks, and other IP protection applications.",
+	"Some of our clients include companies such as: Lawkin.ca, Farms.ca, iSpeed.ca, gotchosen.ca, hiringplug.com, onecircle.ca, CognitoCRM Vietnam, Vite, D2P Global Vietnam",
+	"Our Stellar Track Record of Success includes 250+ successful start-ups; 550+ founders supported; 40+ mentors and advisors onboard.",
+	"The letter should be printed on the bank’s letterhead with your contact information included. You should also provide us with your original signature at the bottom. Should you have any questions, please contact Upasana Sharma at usharma@iqcanada.ca",
+	"IQ Canada indeed has experience in supporting startups within the Oil & Gas and Energy sector. It has worked on projects which are specifically designed to address the challenges in this industry. While specific information cannot be disclosed, this platform is tailored for businesses in Oil & Gas, Agriculture, Power Plants, Waste Water Plants, Food Processing, and the Chemical Industry.",
+	"IQ Canada can assist your startup in ensuring compliance with relevant regulations in the industry in Canada. The platform development takes into account the regulatory landscape, and IQ Canada's expertise extends to guiding startups through compliance requirements.",
+	"Based on the projects IQ Canada has worked on which has advanced features, such as data analytics and real-time monitoring, IQ Canada can likely provide support or insights in conducting comprehensive market research for your specific industry needs.",
+	"IQ Canada showcases a commitment to using the latest technologies for web-based applications. It has recently worked on a project based on the LAMP stack. This choice indicates a familiarity and potential expertise in the LAMP stack, ensuring robust development capabilities. It also has collaborations to choose the latest technology that will align with your business model."
+	"IQ Canada can play a pivotal role in optimizing the business model for your business. It can include features like offering predictive analytics,etc indicating a strategic approach tailored for the complexities of your industry.",
+	"IQ Canada has partnerships or expertise in the legal aspects relevant to your industry. This includes setting up contracts, agreements, and navigating the legal intricacies in this sector."]
+    
     question_db = [preprocess_text(question) for question in startup_questions]
     answer_db = startup_answers
+    conversation_history = []
+
     def chatbot(user_input):
-        nonlocal question_db, answer_db
+        nonlocal conversation_history, question_db
 
         user_input_processed = preprocess_text(user_input)
-        question_db.append(user_input_processed)
-
+        conversation_history.append({"role": "user", "content": user_input_processed})
         vectorizer = TfidfVectorizer()
-        question_vectors = vectorizer.fit_transform(question_db)
+        question_db.append(user_input_processed)
+        question_vectors = vectorizer.fit_transform(question_db)        
         cosine_similarities = cosine_similarity(question_vectors[-1], question_vectors[:-1]).flatten()
         most_similar_index = cosine_similarities.argmax()
         similarity_threshold = 0.5
-
-        if cosine_similarities[most_similar_index] < similarity_threshold:
-                response = query_gpt4_api(user_input_processed)
-        else:
+        if cosine_similarities[most_similar_index] >= similarity_threshold:
                 response = answer_db[most_similar_index]
-    
+        else:
+             response = gpt(user_input_processed,conversation_history)
 
+
+        conversation_history.append({"role": "system", "content": response})
         return response
 
     return chatbot
+
 chatbot_model=create_startup_visa_chatbot()
 
 @app.route('/')
 def index():
-    return render_template("Frontend.html")
+    return render_template("frontendupdated.html")
+
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
+    global conversation_history  # Access the global conversation_history variable
     user_input = request.form['user_input']
     
     if user_input.lower() in ['bye', 'exit', 'quit']:
         response = "Goodbye!"
+        conversation_history = []  # Clear conversation history on user exit
     elif user_input.lower() in ['hi', 'hello', 'hey']:
         response = "Hello! How can I assist you today?"
     else:
         response = chatbot_model(user_input)
 
     return jsonify({'response': response})
-
-@app.route('/text-to-speech', methods=['POST'])
-def text_to_speech():
-    try:
-        # Get text from the request
-        text = request.form.get('text')
-
-        # Initialize the text-to-speech engine
-        engine = pyttsx3.init()
-
-        # Set properties (optional)
-        engine.setProperty('rate', 150)  # Speed of speech
-
-        # Speak the text
-        engine.say(text)
-        engine.runAndWait()
-
-        return jsonify({'status': 'success'})
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 @app.route('/speech-to-text', methods=['POST'])
 def speech_to_text():
@@ -385,6 +163,9 @@ def speech_to_text():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(debug=False)
 
 if __name__ == "__main__":
     app.run(debug=False,port=3017)

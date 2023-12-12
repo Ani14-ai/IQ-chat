@@ -112,10 +112,10 @@ def create_startup_visa_chatbot():
         cosine_similarities = cosine_similarity(question_vectors[-1], question_vectors[:-1]).flatten()
         most_similar_index = cosine_similarities.argmax()
         similarity_threshold = 0.5
-        if cosine_similarities[most_similar_index] >= similarity_threshold:
-                response = answer_db[most_similar_index]
+        if cosine_similarities[most_similar_index] < similarity_threshold:
+               response = gpt(user_input_processed,conversation_history)
         else:
-             response = gpt(user_input_processed,conversation_history)
+             response = answer_db[most_similar_index]  
 
 
         conversation_history.append({"role": "system", "content": response})

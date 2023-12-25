@@ -112,13 +112,12 @@ def create_startup_visa_chatbot():
         cosine_similarities = cosine_similarity(question_vectors[-1], question_vectors[:-1]).flatten()
         most_similar_index = cosine_similarities.argmax()
         similarity_threshold = 0.5
-        if cosine_similarities[most_similar_index] < similarity_threshold:
-               response = gpt(user_input_processed,conversation_history)
+        if most_similar_index < len(answer_db) and cosine_similarities[most_similar_index] >= similarity_threshold:
+            response = answer_db[most_similar_index]
         else:
-             response = answer_db[most_similar_index]  
+             response = gpt(user_input_processed, conversation_history)
 
-
-        conversation_history.append({"role": "system", "content": response})
+        conversation_history.append({"role": "assistant", "content": response})
         return response
 
     return chatbot
@@ -164,8 +163,7 @@ def speech_to_text():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-if __name__ == "__main__":
-    app.run(debug=False)
+
 
 if __name__ == "__main__":
     app.run(debug=False,port=3017)

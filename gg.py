@@ -99,11 +99,10 @@ def create_startup_visa_chatbot():
     
     question_db = [preprocess_text(question) for question in startup_questions]
     answer_db = startup_answers
-    conversation_history = []
+
 
     def chatbot(user_input):
-        nonlocal conversation_history, question_db
-
+        nonlocal question_db
         user_input_processed = preprocess_text(user_input)
         conversation_history.append({"role": "user", "content": user_input_processed})
         vectorizer = TfidfVectorizer()

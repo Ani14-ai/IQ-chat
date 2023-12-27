@@ -134,30 +134,6 @@ def store_user_information(cursor, user_id, name,email,phone):
         conn.close()
 
 chatbot_model=create_startup_visa_chatbot()
-
-
-    def chatbot(user_input):
-        nonlocal question_db
-        user_input_processed = preprocess_text(user_input)
-        conversation_history.append({"role": "user", "content": user_input_processed})
-        vectorizer = TfidfVectorizer()
-        question_db.append(user_input_processed)
-        question_vectors = vectorizer.fit_transform(question_db)        
-        cosine_similarities = cosine_similarity(question_vectors[-1], question_vectors[:-1]).flatten()
-        most_similar_index = cosine_similarities.argmax()
-        similarity_threshold = 0.5
-        if most_similar_index < len(answer_db) and cosine_similarities[most_similar_index] >= similarity_threshold:
-            response = answer_db[most_similar_index]
-        else:
-             response = gpt(user_input_processed, conversation_history)
-
-        conversation_history.append({"role": "assistant", "content": response})
-        return response
-
-    return chatbot
-
-chatbot_model=create_startup_visa_chatbot()
-
 @app.route('/')
 def index():
     return render_template("Frontend.html")

@@ -91,7 +91,7 @@ def create_startup_visa_chatbot():
         nonlocal conversation_history
         user_input_processed = preprocess_text(user_input)
         conversation_history.append({"role": "user", "content": user_input})
-        conn = sqlite3.connect("C:\\Users\chatt\Dropbox\PC\Downloads\startup_database (2).db")
+        conn = sqlite3.connect("startup_database (2).db")
         cursor = conn.cursor()
         cursor.execute('SELECT question, answer FROM startup_qa')
         qa_data = cursor.fetchall()
@@ -124,7 +124,7 @@ def create_startup_visa_chatbot():
     return chatbot
 
 def store_user_information(cursor, user_id, name,email,phone):
-        conn = sqlite3.connect("C:\\Users\chatt\Dropbox\PC\Downloads\startup_database (2).db")
+        conn = sqlite3.connect("startup_database (2).db")
         cursor.execute('''
             INSERT INTO user_information (user_id, name, email, phone) VALUES (?, ?, ?, ?)
         ''', (user_id, name, email, phone))

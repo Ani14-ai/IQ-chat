@@ -32,7 +32,7 @@ def gpt(prompt,ch):
          model="gpt-3.5-turbo",
          response_format={"type": "text"},
          temperature=0.1,
-         max_tokens=100,
+         max_tokens=200,
          messages=[
              {"role": "system", "content": "You are a helpful assistant,called Daniel, for Investor Quotient Canada. You have a knowledge about the company and the visa process in Canada as well. You provide precise and short answers in  1 or 2 lines(not in points). You always engage in a conversation with the customer."},
              {"role": "user", "content": "What is the eligibility criteria ?"},

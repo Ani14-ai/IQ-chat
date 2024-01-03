@@ -29,10 +29,10 @@ def preprocess_text(text):
 
 def gpt(prompt,ch):
   response= client.chat.completions.create(
-         model="gpt-3.5-turbo",
+         model="gpt-3.5-turbo-1106",
          response_format={"type": "text"},
-         temperature=0.1,
-         max_tokens=200,
+         temperature=0.0,
+         max_tokens=250,
          messages=[
              {"role": "system", "content": "You are a helpful assistant,called Daniel, for Investor Quotient Canada. You have a knowledge about the company and the visa process in Canada as well. You provide precise and short answers in  1 or 2 lines(not in points). You always engage in a conversation with the customer."},
              {"role": "user", "content": "What is the eligibility criteria ?"},
@@ -91,7 +91,7 @@ def create_startup_visa_chatbot():
         nonlocal conversation_history
         user_input_processed = preprocess_text(user_input)
         conversation_history.append({"role": "user", "content": user_input})
-        conn = sqlite3.connect("startup_database (2).db")
+        conn = sqlite3.connect("startup_database (3).db")
         cursor = conn.cursor()
         cursor.execute('SELECT question, answer FROM startup_qa')
         qa_data = cursor.fetchall()
@@ -124,7 +124,7 @@ def create_startup_visa_chatbot():
     return chatbot
 
 def store_user_information(cursor, user_id, name,email,phone):
-        conn = sqlite3.connect("startup_database (2).db")
+        conn = sqlite3.connect("startup_database (3).db")
         cursor.execute('''
             INSERT INTO user_information (user_id, name, email, phone) VALUES (?, ?, ?, ?)
         ''', (user_id, name, email, phone))

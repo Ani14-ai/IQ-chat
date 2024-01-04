@@ -1317,15 +1317,32 @@ function receiveMessage(sender, message) {
     chatDisplay.innerHTML += `<div class="${messageClass}">
                                 <img src="${sender === 'You' ? 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb' : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp'}" alt="${sender} Icon" class="${sender === 'You' ? 'user-icon' : 'chatbot-icon'}">
                                 <div class="message-bubble">${message}</div>
-                                ${sender === 'Chatbot' ? `<img class="sound-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340178.png" onclick="toggleSound('${message}')">` : ''}
+                                ${sender === 'Chatbot' ? `<img class="sound-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340178.png" onclick="toggleSound('${message}')"> <img class="mic-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340437.png" style="width: 20px; height: 20px; cursor: pointer; position: absolute; left: 10px; bottom: 110px; " onclick="toggleChatbotVoice()">` : ''}
                             </div>`;
     document.getElementById("user-input").value = "";
 
     chatDisplay.scrollTop = chatDisplay.scrollHeight;
 
     // Speak the message using the text-to-speech API
-    if (sender === 'Chatbot') {
+    if (sender === 'Chatbot' && !isChatbotVoiceMuted) {
         speakMessage(message);
+    }
+}
+
+let isChatbotVoiceMuted = false;
+let currentUtterance;
+
+function toggleChatbotVoice() {
+    isChatbotVoiceMuted = !isChatbotVoiceMuted;
+
+    if (isChatbotVoiceMuted && isSpeaking) {
+        // If currently speaking, cancel the speech
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+    } else if (!isChatbotVoiceMuted && currentUtterance) {
+        // If unmuted and there was a previous utterance, resume speaking
+        window.speechSynthesis.speak(currentUtterance);
+        isSpeaking = true;
     }
 }
 	    

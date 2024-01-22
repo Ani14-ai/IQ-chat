@@ -1314,6 +1314,8 @@ function sendMessage(sender, message) {
 function receiveMessage(sender, message) {
     var chatDisplay = document.getElementById("chat-display");
     var messageClass = sender === 'You' ? 'user-message' : 'chatbot-message';
+    var messageLines = message.split('\n');
+    var formattedMessage = messageLines.join('<br>');
     chatDisplay.innerHTML += `<div class="${messageClass}">
                                 <img src="${sender === 'You' ? 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb' : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp'}" alt="${sender} Icon" class="${sender === 'You' ? 'user-icon' : 'chatbot-icon'}">
                                 <div class="message-bubble">${message}</div>

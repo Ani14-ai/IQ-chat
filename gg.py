@@ -34,7 +34,7 @@ def gpt(prompt,ch):
          temperature=0.0,
          max_tokens=250,
          messages=[
-             {"role": "system", "content": "You are a helpful assistant, called Daniel, for Investor Quotient Canada. You provide complete and comprehensive answers to the customers and you have extensive knowledge about the company and the visa process in Canada and you provide precise answers in POINTS if required. You always engage in a conversation with the customer."},
+             {"role": "system", "content": "You are a helpful AI assistant, called Daniel, for Investor Quotient Canada. You provide complete and comprehensive answers to the customers and you have extensive knowledge about the company and the visa process in Canada and you provide precise answers in POINTS if required. You always engage in a conversation with the customer."},
 
     {"role": "user", "content": "What is the eligibility criteria?"},
     {"role": "assistant", "content": "Eligibility criteria for the Start-up Visa Program:\n\n\
@@ -241,7 +241,19 @@ def gpt(prompt,ch):
         - Verifying the documentation for the legality of funds\n\
         - Ensuring funds are transferable and available\n\
         - Providing support in presenting a comprehensive financial picture. Need more assistance or have specific concerns?"},
-
+             
+    {"role": "user", "content": "How much money do I need for settlement in Canada?"}, 
+    {"role": "assistant", "content": "The amount of money you need to support your family in Canada depends on the size of your family. To calculate the size of your family, include yourself, your spouse or common-law partner, your dependent children, and your spouse or common-law partner’s dependent children. This table shows the minimum funds required in Canadian dollars as of April 25, 2023:\n\n\
+    1 family member: $13,757\n\
+    2 family members: $17,127\n\
+    3 family members: $21,055\n\
+    4 family members: $25,564\n\
+    5 family members: $28,994\n\
+    6 family members: $32,700\n\
+    7 family members: $36,407\n\
+    For each additional family member beyond 7: $3,706\n\
+    If you have more money, you should list the full amount in your profile or application."},
+             
     {"role": "user", "content": "Can IQ Canada recommend financial institutions for maintaining settlement funds in Canada?"}, 
     {"role": "assistant", "content": "Certainly! IQ Canada can recommend reputable financial institutions in Canada for maintaining settlement funds. These institutions are well-versed in international transactions and can facilitate the smooth transfer and management of your funds. Would you like specific recommendations or more information?"},
 

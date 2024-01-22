@@ -1315,11 +1315,14 @@ function receiveMessage(sender, message) {
     var chatDisplay = document.getElementById("chat-display");
     var messageClass = sender === 'You' ? 'user-message' : 'chatbot-message';
     var messageLines = message.split('\n');
+
+    // Replace '.' with '<br>' to display points in a new line
     var formattedMessage = messageLines.join('<br>');
+
     chatDisplay.innerHTML += `<div class="${messageClass}">
                                 <img src="${sender === 'You' ? 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb' : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp'}" alt="${sender} Icon" class="${sender === 'You' ? 'user-icon' : 'chatbot-icon'}">
-                                <div class="message-bubble">${message}</div>
-                                ${sender === 'Chatbot' ? `<img class="sound-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340178.png" onclick="toggleSound('${message}')"> <img class="mic-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340437.png" style="width: 20px; height: 20px; cursor: pointer; position: absolute; left: 10px; bottom: 110px; " onclick="toggleChatbotVoice()">` : ''}
+                                <div class="message-bubble">${formattedMessage}</div>
+                                ${sender === 'Chatbot' ? `<img class="sound-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340178.png" onclick="toggleSound('${formattedMessage}')"> <img class="mic-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340437.png" style="width: 20px; height: 20px; cursor: pointer; position: absolute; left: 10px; bottom: 110px; " onclick="toggleChatbotVoice()">` : ''}
                             </div>`;
     document.getElementById("user-input").value = "";
 
@@ -1330,6 +1333,7 @@ function receiveMessage(sender, message) {
         speakMessage(message);
     }
 }
+
 
 let isChatbotVoiceMuted = false;
 let currentUtterance;

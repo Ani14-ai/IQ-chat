@@ -19,6 +19,15 @@ conversation_history = []
 import sqlite3
 import re
 import uuid
+import pyodbc
+from datetime import datetime
+db_connection_string = (
+    "Driver={ODBC Driver 17 for SQL Server};"
+    "Server=103.145.51.250;"
+    "Database=PMO360_DB;"
+    "UID=PMOlogbook_Usr;"
+    "PWD=PMO_log360!x4;"
+)
 def preprocess_text(text):
     tokens = word_tokenize(text.lower())
     stop_words = set(stopwords.words('english'))
@@ -514,20 +523,25 @@ def create_startup_visa_chatbot():
              conn.commit()
              conn.close()
         conversation_history.append({"role": "assistant", "content": response})
-
+        store_user_information(response,user_input)
         return response
 
     return chatbot
 
-def store_user_information(cursor, user_id, name,email,phone):
-        conn = sqlite3.connect("startup_database (3).db")
-        cursor.execute('''
-            INSERT INTO user_information (user_id, name, email, phone) VALUES (?, ?, ?, ?)
-        ''', (user_id, name, email, phone))
-        cursor.execute('SELECT * FROM user_information')
-        user_info_data = cursor.fetchall()
-        conn.commit()
-        conn.close()
+def store_user_information(response,user):
+        current_datetime = datetime.utcnow()
+        formatted_date = current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+        user_info_conn, user_info_cursor = get_user_info_database_connection()
+        user_info_cursor.execute('''
+            INSERT INTO Iq_chathist (User_input,Bot_response,Date) VALUES (?, ?, ?)
+        ''', (user,response,formatted_date))
+        user_info_conn.commit()
+        user_info_conn.close()
+
+def get_user_info_database_connection():
+    user_info_conn = pyodbc.connect(db_connection_string)
+    user_info_cursor = user_info_conn.cursor()
+    return user_info_conn, user_info_cursor
 
 chatbot_model=create_startup_visa_chatbot()
 @app.route('/')

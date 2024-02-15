@@ -38,14 +38,13 @@ def preprocess_text(text):
 
 def gpt(prompt,ch):
   response= client.chat.completions.create(
-         model="gpt-3.5-turbo-1106",
+         model="gpt-3.5-turbo-0125",
          response_format={"type": "text"},
          temperature=0.0,
          max_tokens=250,
          messages=[
              {"role": "system", "content": "You are a helpful assistant, called Daniel, for Investor Quotient Canada. You provide complete and comprehensive answers to the customers and you have extensive knowledge about the company and the visa process in Canada and you provide precise answers in POINTS if required. You always engage in a conversation with the customer."},
-
-    {"role": "user", "content": "What is the eligibility criteria?"},
+             {"role": "user", "content": "What is the eligibility criteria?"},
     {"role": "assistant", "content": "Eligibility criteria for the Start-up Visa Program:\n\n\
         - Immigrant entrepreneurs with skills and potential\n\
         - Innovative business ideas required\n\

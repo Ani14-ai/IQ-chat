@@ -1,573 +1,594 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Startup Visa Support</title>
-
-	    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
-
-
-    <style>
-    body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: white;
-            word-spacing: -3px;
-            transition: background-color 0.5s;
-            overflow-y: auto;
-        }
-
-        #chat-container {
-            width: 100%;
-            max-width: 400px;
-            height: 85vh;
-            position: fixed;
-            top: 15%;
-            right: 20px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
-            
-            display: flex;
-            flex-direction: column;
-            animation: fadeIn 0.5s ease-out;
-            display: none;
-            transform-origin: top right;
-            transform: scale(0);
-            transition: transform 0.5s ease-in-out;
-	    border-radius: 15px 15px 15px 15px;
-	    mix-blend-mode: normal;
-	    background: rgba(169, 169, 169, 0.6);
-        }
-
-
-
-        
-
-        #chat-container.zoom-in {
-            transform: scale(1); /* Scale back to normal size */
-            transition: transform 0.5s ease-in-out;
-        }
-
-        #chat-display {
-            max-height: calc(100% - 150px);
-            overflow-y: auto;
-            padding: 10px;
-            flex-direction: column;
-            gap: 15px;
-            
-            flex-grow: 5;
-
-/*background: rgba(0, 0, 0, 0);*/
-background: rgba(169, 169, 169, 0.6);
-border-radius: 0px;
-        }
-
-        #chatbot-icon {
-            position: fixed;
-            bottom: 50px;
-            right: 70px;
-            cursor: pointer;
-            z-index: 999; /* Ensure it appears above other elements */
-            transition: transform 0.3s ease, opacity 0.3s, box-shadow 0.3s ease;
-	    opacity: 0.7;
-        }
-
-        #chatbot-icon img {
-            width: 50px; /* Adjust the width as needed */
-            height: 50px; /* Adjust the height as needed */
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-            /
-        }
-
-	#chatbot-icon:hover {
-            transform: scale(1.2); /* Enlarge the icon on hover */
-	    opacity: 1;
-	    
-        }
-
-	
-
-        #chatbot-icon::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            background: linear-gradient(to bottom, #961B1E, #510400);
-            color: white;
-            padding: 25px;
-            border: 0px;
-            border-radius: 35px;
-            font-size: 12px;
-            word-spacing: 1.5px;
-            margin-bottom: 20px;
-            opacity: 1;
-            transition: opacity 0.3s, transform 0.3s;
-            visibility: visible;
-            width: 200px;
-            text-align: center;
-            margin-top: -75px;
-            margin-left: -245px;
-        }
-
-        #chatbot-icon::before {
-            content: '';
-            background: linear-gradient(to bottom, #961B1E, #510400);
-            position: absolute;
-            border-style: solid;
-            border-width: 10px 10px 0;
-            border-color: #510400 transparent transparent transparent;
-            top: -20%;
-            left: 20%;
-            transform: translateY(50%);
-            opacity: 1;
-            visibility: visible;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+ 
+    <!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Startup Visa Support</title>
+    
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    
+    
+        <style>
+        body {
+                font-family: 'Poppins', sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: white;
+                word-spacing: -3px;
+                transition: background-color 0.5s;
+                overflow-y: auto;
             }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        #chat-header {
-            font-family: 'Poppins';
-	    font-style: normal;
-	    font-weight: 450;
-	    font-size: 24px;
-	    line-height: 36px;
-	    word-spacing: 2px; 
-	    display: flex;
-            align-items: center;
-            padding: 15px;
-
-	    color: #FFFFFF;
-            background: #961B1E;
-	    border-radius: 15px 15px 0 0;
-
-	    
-        }
-
-        #chat-header img {
-            width: 70px;
-            height: 70px;
-            margin-right: 10px;
-            border-radius: 50%;
-        }
-
-        #chat-logo {
-            background: url('https://media.licdn.com/dms/image/C560BAQGzOGPLE-VzhQ/company-logo_200_200/0/1630657313008?e=2147483647&v=beta&t=NLGTGN8RgMa7mymb2F_mpsXQZnD3lLb-wdePleu07Q8');
-            background-size: contain;
-            width: 50px;
-            height: 50px;
-            margin: 0px 10px 0px;
-
-	    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-border-radius: 30px;
-        }
-
-        .user-message,
-        .chatbot-message {
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .user-message:last-child,
-        .chatbot-message:last-child {
-            margin-bottom: 0;
-        }
-
-        .user-message {
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-        }
-
-        .user-message .user-icon-input {
-            width: 40px;
-            height: 40px;
-            margin-left: 10px;
-	    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-        }
-
-        .user-message .message-bubble {
-            padding: 10px;
-            word-wrap: break-word;
-            flex: 1;
-            font-size: 13px;
-            word-spacing: 1.2px;
-            max-width: calc(65% - 40px);
-            background-color: #e8e9eb;
-            border-radius: 15px 15px 0 15px;
-            color: #961B1E;
-
-	    font-family: 'Poppins';
-font-style: normal;
-font-weight: 350;
-	
-
-        }
-
-        .chatbot-message {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 10px;
-
-        }
-
-        .chatbot-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-right: 10px;
-	    margin-left: 2px;
-	    /*border: 0.5px solid black;*/
-	    border-width: 10px;
-        }
-
-        .chatbot-message .message-bubble {
-            padding: 10px;
-            word-wrap: break-word;
-            flex: 1;
-            font-size: 13px;
-            word-spacing: 1.2px;
-            max-width: calc(65% - 40px);
-            background: #961B1E;
-            border-radius: 0px 25px 25px 25px;
-            color: white;
-            position: relative;
-            margin-right: auto;
-
-		font-family: 'Poppins';
-font-style: normal;
-font-weight: 150;
-	    }
-
-	
-
-
-
-        .user-icon,
-        .chatbot-icon {
-            width: 30px;
-            height: 30px;
-	    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-            border-radius: 50%;
-        }
-
-        .user-icon {
-            background-color: white;
-            margin-left: 10px;
-            margin-right: 2px;
-	    margin-bottom: 2px;
-	    
-        }
-
-        .sound-icon {
-            width: 20px;
-            height: 20px;
-            margin-left: 5px;
-            cursor: pointer;
-            display: none;
-        }
-
-        #microphone-icon {
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
-            cursor: pointer;
-	    border-radius: 50%;	
-	    transition: background-color 0.3s, transform 0.3s;
-	    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-        }
-
-	#microphone-icon:hover {
-            background-color: #961B1E;
-            transform: scale(1.1);
-        }
-
-
-        #user-input-container {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background: #961B1E;
-            border-top: 1px solid #ddd;
-	    border-radius: 0 0 15px 15px;
-	
-        }
-
-        #user-input {
-            flex: 1;
-            padding: 15px;
-            box-sizing: border-box;
-            border: none;
-            resize: none;
-            font-size: 14px;
-            border-radius: 15px;
-            margin-right: 10px;
-            outline: none;
-            transition: background-color 0.3s, box-shadow 0.3s, color 0.3s;
-            background-color: #fff;
-            color: black;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-        }
-
-        #user-input:focus {
-            background-color: #f0f0f0;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 1);
-            color: black;
-        }
-
-        #chat-container,
-        #chat-header,
-        .user-message,
-        .chatbot-message,
-        #user-input-container {
-            transition: background-color 0.5s, box-shadow 0.5s;
-        }
-
-        #send-button {
-            background-color: #c32148;
-            color: #fff;
-            
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 25px;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            outline: none;
-            transition: background-color 0.3s, transform 0.3s;
-	    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-        }
-
-        #send-button:hover {
-            background-color: #961B1E;
-            transform: scale(1.1);
-        }
-
-        .chatbot-message .option-button {
-            max-width: 450px;
-            display: flex;
-            justify-content: center;
+    
+            #chat-container {
+                width: 100%;
+                max-width: 400px;
+                height: 85vh;
+                position: fixed;
+                top: 15%;
+                right: 20px;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.9);
+                
+                display: flex;
+                flex-direction: column;
+                animation: fadeIn 0.5s ease-out;
+                display: none;
+                transform-origin: top right;
+                transform: scale(0);
+                transition: transform 0.5s ease-in-out;
             border-radius: 15px 15px 15px 15px;
-
-        }
-
-        .option-button[data-tooltip]::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            background-color: #333;
-            color: #fff;
-            padding: 5px;
-            border-radius: 5px;
-            font-size: 12px;
-            margin-top: -30px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .user-icon-input {
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
-	    border-radius: 50%;
-	    box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
-        }
-
-        .option-button:hover[data-tooltip]::after {
+            mix-blend-mode: normal;
+            background: rgba(169, 169, 169, 0.6);
+            }
+    
+    
+    
+            
+    
+            #chat-container.zoom-in {
+                transform: scale(1); /* Scale back to normal size */
+                transition: transform 0.5s ease-in-out;
+            }
+    
+            #chat-display {
+                max-height: calc(100% - 150px);
+                overflow-y: auto;
+                padding: 10px;
+                flex-direction: column;
+                gap: 15px;
+                
+                flex-grow: 5;
+    
+    /*background: rgba(0, 0, 0, 0);*/
+    background: rgba(169, 169, 169, 0.6);
+    border-radius: 0px;
+            }
+    
+            #chatbot-icon {
+                position: fixed;
+                bottom: 50px;
+                right: 70px;
+                cursor: pointer;
+                z-index: 999; /* Ensure it appears above other elements */
+                transition: transform 0.3s ease, opacity 0.3s, box-shadow 0.3s ease;
+            opacity: 0.7;
+            }
+    
+            #chatbot-icon img {
+                width: 50px; /* Adjust the width as needed */
+                height: 50px; /* Adjust the height as needed */
+                border-radius: 50%;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+                /
+            }
+    
+        #chatbot-icon:hover {
+                transform: scale(1.2); /* Enlarge the icon on hover */
             opacity: 1;
-        }
-
-        #close-chat {
-            position: absolute;
-            top: 15px;
-            right: 12px;
-            cursor: pointer;
-	    outline: none;	
-	   
-        }
-
-        #close-chat img {
-            width: 23px;
-            height: 23px;
-	    border-radius: 50%;
-	    box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
-        }
-
-
-</style>
-
-
-</head>
-<body>
-
-    <div id="chat-container">
-	<div id="close-chat" onclick="closeChatbot()">
-        <img src="https://t3.ftcdn.net/jpg/01/09/34/96/240_F_109349661_XAYjdcAWHZ0UyHQk8TErcejfl8Dj4sPR.jpg" alt="Close Icon">
-    </div>
-        <div id="chat-header">
-            <div id="chat-logo"></div>
-            Chat with IQ
-        </div>
-
-        <div id="chat-display"></div>
-
-        <div id="user-input-container">
-            <img src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb" alt="User Icon" class="user-icon-input">
-            <textarea id="user-input" placeholder="Ask me anything...!!"></textarea>
-	    <input type="file" id="audio-input" accept="audio/*" style="display: none;">
-	    <img id="microphone-icon" src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRXuqlbO0PMc9fQD74EBb5RR_UwzpZcSBy2ejr0-MQCrknv5lrW" alt="Microphone Icon" onclick="startRecording()">
-            <img id="send-button" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNg5F7bVpxb-dtJ3DLv4-BhR50Y8vVAsLvBxLlBeqi6-UCoOO_" onclick
-="sendMessage('You', getUserInput())"></button>
-        </div>
-    </div>
-
-       <script>
-        function toggleOption(option) {
-            document.getElementById('textToText').classList.remove('option-active');
-            document.getElementById('textToSpeech').classList.remove('option-active');
-            document.getElementById('videoCall').classList.remove('option-active');
-            document.getElementById(option).classList.add('option-active');
-
-            switch (option) {
-                case 'textToText':
-                    textToText();
-                    break;
-                case 'textToSpeech':
-                    textToSpeech();
-                    break;
-                case 'videoCall':
-                    videoCall();
-                    break;
-                default:
-                    break;
+            
             }
-        }
-
-        function textToText() {
-            const userInput = getUserInput();
-            if (userInput.trim() !== "") {
-                sendMessage("You", userInput);
-                receiveMessage("Chatbot", "This is a response from the chatbot.");
-            }
-        }
-
-        function textToSpeech() {
-            const userInput = getUserInput();
-            if (userInput.trim() !== "") {
-                sendMessage("You", userInput);
-                receiveMessage("Chatbot", "This is a response from the chatbot.");
-            }
-        }
-
-        function videoCall() {
-            const userInput = getUserInput();
-            if (userInput.trim() !== "") {
-                sendMessage("You", userInput);
-                receiveMessage("Chatbot", "This is a response from the chatbot.");
-            }
-        }
-
-function sendMessage(sender, message) {
-    var chatDisplay = document.getElementById("chat-display");
-    var messageClass = sender === 'You' ? 'user-message' : 'chatbot-message';
-
-    // Create a div for the message bubble
-    var messageBubble = document.createElement('div');
-    messageBubble.className = messageClass;
-
-    // Create the message bubble content
-    var messageContent = document.createElement('div');
-    messageContent.className = 'message-bubble';
-    messageContent.textContent = message;
-
-    // Append the user or chatbot icon to the message bubble
-    var iconSrc = sender === 'You'
-        ? 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb'
-        : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp';
-
-    var iconAlt = sender === 'You' ? 'User Icon' : 'Chatbot Icon';
-
-    var messageIcon = document.createElement('img');
-    messageIcon.src = iconSrc;
-    messageIcon.alt = iconAlt;
-    messageIcon.className = sender === 'You' ? 'user-icon' : 'chatbot-icon';
-
-    // Append the message content and icon to the message bubble
-    messageBubble.appendChild(messageContent);
-    messageBubble.appendChild(messageIcon);
-
-    // Append the message bubble to the chat display
-    chatDisplay.appendChild(messageBubble);
-
-    // Clear the user input
-    document.getElementById("user-input").value = "";
-
-    // Send user input to the server
-    fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-            'user_input': message, // Send the actual message instead of user input
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Display the chatbot response
-        receiveMessage("Chatbot", data.response);
-    })
-    .catch(error => console.error('Error:', error));
-	chatDisplay.scrollTop = chatDisplay.scrollHeight;
-}
-
-
-
-function receiveMessage(sender, message) {
-    var chatDisplay = document.getElementById("chat-display");
-    var messageClass = sender === 'You' ? 'user-message' : 'chatbot-message';
-    var messageLines = message.split('\n');
-
-    // Replace '.' with '<br>' to display points in a new line
-    var formattedMessage = messageLines.join('<br>');
-
-    chatDisplay.innerHTML += `<div class="${messageClass}">
-                                <img src="${sender === 'You' ? 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb' : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp'}" alt="${sender} Icon" class="${sender === 'You' ? 'user-icon' : 'chatbot-icon'}">
-                                <div class="message-bubble">${formattedMessage}</div>
-                                ${sender === 'Chatbot' ? `<img class="sound-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340178.png" onclick="toggleSound('${formattedMessage}')"> <img class="mic-icon" src="https://cdn-icons-png.flaticon.com/128/4340/4340437.png" style="width: 20px; height: 20px; cursor: pointer; position: absolute; left: 10px; bottom: 110px; " onclick="toggleChatbotVoice()">` : ''}
-                            </div>`;
-    document.getElementById("user-input").value = "";
-
-    chatDisplay.scrollTop = chatDisplay.scrollHeight;
-
-    // Speak the message using the text-to-speech API
-    if (sender === 'Chatbot' && !isChatbotVoiceMuted) {
-        speakMessage(message);
+    
+            .sound {
+       aspect-ratio: 1/1;
+       width: 25px;
+       margin-left: 0.5rem;
+       position: fixed;
+       bottom: 7.5rem;
     }
-}
 
-
-let isChatbotVoiceMuted = false;
-let currentUtterance;
-
-function toggleChatbotVoice() {
+    
+            #chatbot-icon::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                background: linear-gradient(to bottom, #961B1E, #510400);
+                color: white;
+                padding: 25px;
+                border: 0px;
+                border-radius: 35px;
+                font-size: 12px;
+                word-spacing: 1.5px;
+                margin-bottom: 20px;
+                opacity: 1;
+                transition: opacity 0.3s, transform 0.3s;
+                visibility: visible;
+                width: 200px;
+                text-align: center;
+                margin-top: -75px;
+                margin-left: -245px;
+            }
+    
+            #chatbot-icon::before {
+                content: '';
+                background: linear-gradient(to bottom, #961B1E, #510400);
+                position: absolute;
+                border-style: solid;
+                border-width: 10px 10px 0;
+                border-color: #510400 transparent transparent transparent;
+                top: -20%;
+                left: 20%;
+                transform: translateY(50%);
+                opacity: 1;
+                visibility: visible;
+            }
+    
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+    
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+    
+            #chat-header {
+                font-family: 'Poppins';
+            font-style: normal;
+            font-weight: 450;
+            font-size: 24px;
+            line-height: 36px;
+            word-spacing: 2px; 
+            display: flex;
+                align-items: center;
+                padding: 15px;
+    
+            color: #FFFFFF;
+                background: #961B1E;
+            border-radius: 15px 15px 0 0;
+    
+            
+            }
+    
+            #chat-header img {
+                width: 70px;
+                height: 70px;
+                margin-right: 10px;
+                border-radius: 50%;
+            }
+    
+            #chat-logo {
+                background: url('https://media.licdn.com/dms/image/C560BAQGzOGPLE-VzhQ/company-logo_200_200/0/1630657313008?e=2147483647&v=beta&t=NLGTGN8RgMa7mymb2F_mpsXQZnD3lLb-wdePleu07Q8');
+                background-size: contain;
+                width: 50px;
+                height: 50px;
+                margin: 0px 10px 0px;
+    
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    border-radius: 30px;
+            }
+    
+            .user-message,
+            .chatbot-message {
+                overflow: hidden;
+                margin-bottom: 10px;
+            }
+    
+            .user-message:last-child,
+            .chatbot-message:last-child {
+                margin-bottom: 0;
+            }
+    
+            .user-message {
+                display: flex;
+                align-items: flex-end;
+                justify-content: flex-end;
+                margin-bottom: 10px;
+            }
+    
+            .user-message .user-icon-input {
+                width: 40px;
+                height: 40px;
+                margin-left: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            }
+    
+            .user-message .message-bubble {
+                padding: 10px;
+                word-wrap: break-word;
+                flex: 1;
+                font-size: 13px;
+                word-spacing: 1.2px;
+                max-width: calc(65% - 40px);
+                background-color: #e8e9eb;
+                border-radius: 15px 15px 0 15px;
+                color: #961B1E;
+    
+            font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 350;
+        
+    
+            }
+    
+            .chatbot-message {
+                display: flex;
+                align-items: flex-start;
+                margin-bottom: 10px;
+    
+            }
+    
+            .chatbot-icon {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background-color: white;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                margin-right: 10px;
+            margin-left: 2px;
+            /*border: 0.5px solid black;*/
+            border-width: 10px;
+            }
+    
+            .chatbot-message .message-bubble {
+                padding: 10px;
+                word-wrap: break-word;
+                flex: 1;
+                font-size: 13px;
+                word-spacing: 1.2px;
+                max-width: calc(65% - 40px);
+                background: #961B1E;
+                border-radius: 0px 25px 25px 25px;
+                color: white;
+                position: relative;
+                margin-right: auto;
+    
+            font-family: 'Poppins';
+    font-style: normal;
+    font-weight: 150;
+            }
+    
+        
+    
+    
+    
+            .user-icon,
+            .chatbot-icon {
+                width: 30px;
+                height: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+                border-radius: 50%;
+            }
+    
+            .user-icon {
+                background-color: white;
+                margin-left: 10px;
+                margin-right: 2px;
+            margin-bottom: 2px;
+            
+            }
+    
+            .sound-icon {
+                width: 20px;
+                height: 20px;
+                margin-left: 5px;
+                cursor: pointer;
+                display: none;
+            }
+    
+            #microphone-icon {
+                width: 40px;
+                height: 40px;
+                margin-right: 10px;
+                cursor: pointer;
+            border-radius: 50%;	
+            transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            }
+    
+        #microphone-icon:hover {
+                background-color: #961B1E;
+                transform: scale(1.1);
+            }
+    
+    
+            #user-input-container {
+                display: flex;
+                align-items: center;
+                padding: 15px;
+                background: #961B1E;
+                border-top: 1px solid #ddd;
+            border-radius: 0 0 15px 15px;
+        
+            }
+    
+            #user-input {
+                flex: 1;
+                padding: 15px;
+                box-sizing: border-box;
+                border: none;
+                resize: none;
+                font-size: 14px;
+                border-radius: 15px;
+                margin-right: 10px;
+                outline: none;
+                transition: background-color 0.3s, box-shadow 0.3s, color 0.3s;
+                background-color: #fff;
+                color: black;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            }
+    
+            #user-input:focus {
+                background-color: #f0f0f0;
+                box-shadow: 0 0 8px rgba(0, 0, 0, 1);
+                color: black;
+            }
+    
+            #chat-container,
+            #chat-header,
+            .user-message,
+            .chatbot-message,
+            #user-input-container {
+                transition: background-color 0.5s, box-shadow 0.5s;
+            }
+    
+            #send-button {
+                background-color: #c32148;
+                color: #fff;
+                
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 25px;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                outline: none;
+                transition: background-color 0.3s, transform 0.3s;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            }
+    
+            #send-button:hover {
+                background-color: #961B1E;
+                transform: scale(1.1);
+            }
+    
+            .chatbot-message .option-button {
+                max-width: 450px;
+                display: flex;
+                justify-content: center;
+                border-radius: 15px 15px 15px 15px;
+    
+            }
+    
+            .option-button[data-tooltip]::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                background-color: #333;
+                color: #fff;
+                padding: 5px;
+                border-radius: 5px;
+                font-size: 12px;
+                margin-top: -30px;
+                opacity: 0;
+                transition: opacity 0.3s;
+            }
+    
+            .user-icon-input {
+                width: 40px;
+                height: 40px;
+                margin-right: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+            }
+    
+            .option-button:hover[data-tooltip]::after {
+                opacity: 1;
+            }
+    
+            #close-chat {
+                position: absolute;
+                top: 15px;
+                right: 12px;
+                cursor: pointer;
+            outline: none;	
+           
+            }
+    
+            #close-chat img {
+                width: 23px;
+                height: 23px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+            }
+    
+    
+    </style>
+    
+    
+    </head>
+    <body>
+    
+        <div id="chat-container">
+        <div id="close-chat" onclick="closeChatbot()">
+            <img src="https://t3.ftcdn.net/jpg/01/09/34/96/240_F_109349661_XAYjdcAWHZ0UyHQk8TErcejfl8Dj4sPR.jpg" alt="Close Icon">
+        </div>
+            <div id="chat-header">
+                <div id="chat-logo"></div>
+                Chat with IQ
+            </div>
+    
+            <div id="chat-display">
+                <img id="sound-off" class="sound" alt="sound-off"
+                    src="https://cdn-icons-png.flaticon.com/128/4340/4340437.png" onclick="toggleChatbotVoice('off')">
+                <img id="sound-on" class="sound" src="https://cdn4.iconfinder.com/data/icons/web-ui-color/128/Audio-512.png"
+                    alt="sound-on" onclick="toggleChatbotVoice('on')">
+            </div>
+    
+            <div id="user-input-container">
+                <img src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb" alt="User Icon" class="user-icon-input">
+                <textarea id="user-input" placeholder="Ask me anything...!!"></textarea>
+            <input type="file" id="audio-input" accept="audio/*" style="display: none;">
+            <img id="microphone-icon" src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRXuqlbO0PMc9fQD74EBb5RR_UwzpZcSBy2ejr0-MQCrknv5lrW" alt="Microphone Icon" onclick="startRecording()">
+                <img id="send-button" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNg5F7bVpxb-dtJ3DLv4-BhR50Y8vVAsLvBxLlBeqi6-UCoOO_" onclick
+    ="sendMessage('You', getUserInput())"></button>
+            </div>
+        </div>
+    
+           <script>
+            function toggleOption(option) {
+                document.getElementById('textToText').classList.remove('option-active');
+                document.getElementById('textToSpeech').classList.remove('option-active');
+                document.getElementById('videoCall').classList.remove('option-active');
+                document.getElementById(option).classList.add('option-active');
+    
+                switch (option) {
+                    case 'textToText':
+                        textToText();
+                        break;
+                    case 'textToSpeech':
+                        textToSpeech();
+                        break;
+                    case 'videoCall':
+                        videoCall();
+                        break;
+                    default:
+                        break;
+                }
+            }
+    
+            function textToText() {
+                const userInput = getUserInput();
+                if (userInput.trim() !== "") {
+                    sendMessage("You", userInput);
+                    receiveMessage("Chatbot", "This is a response from the chatbot.");
+                }
+            }
+    
+            function textToSpeech() {
+                const userInput = getUserInput();
+                if (userInput.trim() !== "") {
+                    sendMessage("You", userInput);
+                    receiveMessage("Chatbot", "This is a response from the chatbot.");
+                }
+            }
+    
+            function videoCall() {
+                const userInput = getUserInput();
+                if (userInput.trim() !== "") {
+                    sendMessage("You", userInput);
+                    receiveMessage("Chatbot", "This is a response from the chatbot.");
+                }
+            }
+    
+    function sendMessage(sender, message) {
+        var chatDisplay = document.getElementById("chat-display");
+        var messageClass = sender === 'You' ? 'user-message' : 'chatbot-message';
+    
+        // Create a div for the message bubble
+        var messageBubble = document.createElement('div');
+        messageBubble.className = messageClass;
+    
+        // Create the message bubble content
+        var messageContent = document.createElement('div');
+        messageContent.className = 'message-bubble';
+        messageContent.textContent = message;
+    
+        // Append the user or chatbot icon to the message bubble
+        var iconSrc = sender === 'You'
+            ? 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb'
+            : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp';
+    
+        var iconAlt = sender === 'You' ? 'User Icon' : 'Chatbot Icon';
+    
+        var messageIcon = document.createElement('img');
+        messageIcon.src = iconSrc;
+        messageIcon.alt = iconAlt;
+        messageIcon.className = sender === 'You' ? 'user-icon' : 'chatbot-icon';
+    
+        // Append the message content and icon to the message bubble
+        messageBubble.appendChild(messageContent);
+        messageBubble.appendChild(messageIcon);
+    
+        // Append the message bubble to the chat display
+        chatDisplay.appendChild(messageBubble);
+    
+        // Clear the user input
+        document.getElementById("user-input").value = "";
+    
+        // Send user input to the server
+        fetch('https://iqcanada.waysdatalabs.com/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'user_input': message, // Send the actual message instead of user input
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Display the chatbot response
+            receiveMessage("Chatbot", data.response);
+        })
+        .catch(error => console.error('Error:', error));
+        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    }
+    
+    
+    
+    function receiveMessage(sender, message) {
+        var chatDisplay = document.getElementById("chat-display");
+        var messageClass = sender === 'You' ? 'user-message' : 'chatbot-message';
+        var messageLines = message.split('\n');
+    
+        // Replace '.' with '<br>' to display points in a new line
+        var formattedMessage = messageLines.join('<br>');
+    
+        chatDisplay.innerHTML += `<div class="${messageClass}">
+                                    <img src="${sender === 'You' ? 'https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcQHDtp1ofi_Tw8kalFbUo6ymhWOD6v4MfgfteBnQlGsaYfPJZEb' : 'https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp'}" alt="${sender} Icon" class="${sender === 'You' ? 'user-icon' : 'chatbot-icon'}">
+                                    <div class="message-bubble">${formattedMessage}</div>
+                                </div>`;
+        document.getElementById("user-input").value = "";
+    
+        chatDisplay.scrollTop = chatDisplay.scrollHeight;
+    
+        // Speak the message using the text-to-speech API
+        if (sender === 'Chatbot' && !isChatbotVoiceMuted) {
+            speakMessage(message);
+        }
+    }
+    
+    
+    let isChatbotVoiceMuted = false;
+    let currentUtterance;
+    
+    function toggleChatbotVoice(type) {
     isChatbotVoiceMuted = !isChatbotVoiceMuted;
+
+    if (type === 'on') {
+        document.getElementById('sound-on').style.display = 'none';
+        document.getElementById('sound-off').style.display = 'block';
+    } else {
+        document.getElementById('sound-off').style.display = 'none';
+        document.getElementById('sound-on').style.display = 'block';
+    }
+
 
     if (isChatbotVoiceMuted && isSpeaking) {
         // If currently speaking, cancel the speech
@@ -579,242 +600,246 @@ function toggleChatbotVoice() {
         isSpeaking = true;
     }
 }
-	    
-let isSpeaking=false;
+            
+    let isSpeaking=false;
+    
+    
+    function speakChatbotIntroduction() {
+        let introductionMessage = "Hello! Greetings from IQ Canada!! I am Daniel, and I am here to assist you. Feel free to ask me anything.";
+        speakMessage(introductionMessage);
+    }
+    
+    function speakMessage(text) {
+    let utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+    if (isSpeaking) {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        return;
+    }
+    utterance.lang = 'en';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
 
-
-function speakChatbotIntroduction() {
-    // Speak the initial chatbot introduction
-    var introductionMessage = "Hello! Greetings from IQ Canada!! I am Daniel, and I am here to assist you. Feel free to ask me anything.";
-    speakMessage(introductionMessage);
-}
-
-
-function speakMessage(text) {
-var utterance = new SpeechSynthesisUtterance(text);
-window.speechSynthesis.speak(utterance);
-if (isSpeaking) {
-    window.speechSynthesis.cancel();
-    isSpeaking = false;
-    return;
-}
-// Optionally set properties like voice, rate, pitch, etc.
-utterance.lang = 'en';
-utterance.rate = 1.0;
-utterance.pitch = 1.0;
-
-isSpeaking = true;
-currentUtterance = utterance;
-// Listen for the end event to know when the speech is finished
-utterance.addEventListener('end', () => {
-    isSpeaking = false;
-    currentUtterance=utterance// Reset the isSpeaking flag when speech ends
-});
-
-}
-
-
-        function getUserInput() {
-            return document.getElementById("user-input").value;
-        }
-
-        function introduceChatbot() {
-            setTimeout(function () {
-                receiveMessage("Chatbot", "Hello! Greetings from IQ Canada!! I am Daniel, and I am here to assist you. Feel free to ask me anything.");
-		speak
-                /*setTimeout(function () {
-                    receiveMessage("Chatbot", "Please choose one of the following options:");
-                    showOptions(["Eligibilty criteria", "Language Requirements", "Apply now"]); // Customize the options as needed
-                }, 1000);*/
-
-            }, 1000);
-        }
-
-        function showOptions(options) {
-            var chatDisplay = document.getElementById("chat-display");
-            options.forEach(function (option, index) {
-                chatDisplay.innerHTML += `<div class="chatbot-message">
-                                        <div class="message-bubble option-button" onclick="handleOptionClick('${option}')">
-                                            ${option}
-                                        </div>
-                                      </div>`;
-            });
-            chatDisplay.scrollTop = chatDisplay.scrollHeight;
-        }
-
-        function selectOption(option) {
-            sendMessage("You", ` ${option}`);
-        }
-
-	function handleOptionClick(option) {
-    sendMessage("You", option);
-
-    setTimeout(function () {
-        var chatbotResponse = "";
-
-        switch (option) {
-            case 'Eligibilty criteria':
-                chatbotResponse = "To be eligible for Canada's Start-up Visa Program, entrepreneurs must have the skills and potential to build businesses in Canada that are innovative, can create jobs for Canadians, and can compete on a global scale. Additionally, they must have the support of one of the designated organizations, such as a venture capital fund or business incubator, and meet other requirements such as proof of personal settlement funds, intent to incorporate a business in Canada, control of IP/assets within the business, and English proficiency (CLB 5). There is no age or education threshold, and up to 5 founders in a startup are allowed.";
-                break;
-            case 'Language Requirements':
-                chatbotResponse = "The application process for Canada's Start-up Visa Program involves several steps. Language requirements include meeting a minimum CLB 5 in all four language abilities: reading, writing, speaking, and listening.";
-                break;
-            default:
-                chatbotResponse = "You selected: " + option + ". Here is some information related to " + option;
-                break;
-        }
-		 receiveMessage("Chatbot", chatbotResponse);
-    }, 1000);
-}
-
-	 document.getElementById("user-input").addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            event.preventDefault(); // Prevents adding a new line
-            sendMessage('You', getUserInput());
-        }
+    isSpeaking = true;
+    currentUtterance = utterance;
+    // Listen for the end event to know when the speech is finished
+    utterance.addEventListener('end', () => {
+        isSpeaking = false;
+        currentUtterance = utterance// Reset the isSpeaking flag when speech ends
     });
 
-	window.onload = function () {
-            introduceChatbot();
-        };
-	let isRecording = false;
-    	let recognition;
+}
 
-    	function startRecording() {
-        if (!isRecording) {
-            recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.onstart = function () {
-                isRecording = true;
-            };
-            recognition.onresult = function (event) {
-                const result = event.results[event.results.length - 1][0].transcript;
-                document.getElementById('user-input').value = result;
-            };
-            recognition.onend = function () {
-                isRecording = false;
-            };
-
-            recognition.start();
-        } else {
-            recognition.stop();
-        }
-    }
-
-    // Modify the existing send-button onclick to use the speech-to-text API
-    document.getElementById('send-button').onclick = function () {
-        const userInput = getUserInput();
-        if (userInput.trim() !== "") {
-            // If the user has entered text manually, send it as a normal text message
-            sendMessage("You", userInput);
-        } else {
-            // If the user used speech-to-text, send the audio file to the server
-            const audioInput = document.getElementById('audio-input').files[0];
-            if (audioInput) {
-                sendAudioMessage(audioInput);
-            }
-        }
-    };
-
-    function sendAudioMessage(audioInput) {
-        const formData = new FormData();
-        formData.append('audio', audioInput);
-
-        fetch('/speech-to-text', {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Display the transcribed text as a user message
-            receiveMessage("You", data.transcription);
-        })
-        .catch(error => console.error('Error:', error));
-    }
-    function startTextToSpeech() {
-        var userInput = getUserInput();
-
-        // Send user input to the server for text-to-speech
-        fetch('/text-to-speech', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: new URLSearchParams({
-                'text': userInput,
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                console.log('Text-to-speech successful.');
-            } else {
-                console.error('Text-to-speech error:', data.error);
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-	function toggleChatbot() {
-    var chatIcon = document.getElementById('chatbot-icon');
-    var chatContainer = document.getElementById('chat-container');
+function introduceChatbot(message) {
+    setTimeout(function () {
+        receiveMessage("Chatbot", message);
+    }, 1000);
+}
     
-     if (chatContainer.style.display === 'none') {
-        // Show the chat container
-        chatContainer.style.display = 'flex';
-	chatIcon.style.display = 'none';
-        // Start speaking when the chatbot interface is opened
-        speakChatbotIntroduction();
-    } else {
-        // Hide the chat container
-        chatContainer.style.display = 'none';
-
-        // Stop speaking when the chatbot interface is closed
+    
+            function getUserInput() {
+                return document.getElementById("user-input").value;
+            }
+    
+            function introduceChatbot() {
+                setTimeout(function () {
+                    receiveMessage("Chatbot", "Hello! Greetings from IQ Canada!! I am Daniel, and I am here to assist you. Feel free to ask me anything.");
+            speak
+                    /*setTimeout(function () {
+                        receiveMessage("Chatbot", "Please choose one of the following options:");
+                        showOptions(["Eligibilty criteria", "Language Requirements", "Apply now"]); // Customize the options as needed
+                    }, 1000);*/
+    
+                }, 1000);
+            }
+    
+            function showOptions(options) {
+                var chatDisplay = document.getElementById("chat-display");
+                options.forEach(function (option, index) {
+                    chatDisplay.innerHTML += `<div class="chatbot-message">
+                                            <div class="message-bubble option-button" onclick="handleOptionClick('${option}')">
+                                                ${option}
+                                            </div>
+                                          </div>`;
+                });
+                chatDisplay.scrollTop = chatDisplay.scrollHeight;
+            }
+    
+            function selectOption(option) {
+                sendMessage("You", ` ${option}`);
+            }
+    
+        function handleOptionClick(option) {
+        sendMessage("You", option);
+    
+        setTimeout(function () {
+            var chatbotResponse = "";
+    
+            switch (option) {
+                case 'Eligibilty criteria':
+                    chatbotResponse = "To be eligible for Canada's Start-up Visa Program, entrepreneurs must have the skills and potential to build businesses in Canada that are innovative, can create jobs for Canadians, and can compete on a global scale. Additionally, they must have the support of one of the designated organizations, such as a venture capital fund or business incubator, and meet other requirements such as proof of personal settlement funds, intent to incorporate a business in Canada, control of IP/assets within the business, and English proficiency (CLB 5). There is no age or education threshold, and up to 5 founders in a startup are allowed.";
+                    break;
+                case 'Language Requirements':
+                    chatbotResponse = "The application process for Canada's Start-up Visa Program involves several steps. Language requirements include meeting a minimum CLB 5 in all four language abilities: reading, writing, speaking, and listening.";
+                    break;
+                default:
+                    chatbotResponse = "You selected: " + option + ". Here is some information related to " + option;
+                    break;
+            }
+             receiveMessage("Chatbot", chatbotResponse);
+        }, 1000);
+    }
+    
+         document.getElementById("user-input").addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault(); // Prevents adding a new line
+                sendMessage('You', getUserInput());
+            }
+        });
+    
+        window.onload = function () {
+                introduceChatbot();
+            };
+        let isRecording = false;
+            let recognition;
+    
+            function startRecording() {
+            if (!isRecording) {
+                recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.onstart = function () {
+                    isRecording = true;
+                };
+                recognition.onresult = function (event) {
+                    const result = event.results[event.results.length - 1][0].transcript;
+                    document.getElementById('user-input').value = result;
+                };
+                recognition.onend = function () {
+                    isRecording = false;
+                };
+    
+                recognition.start();
+            } else {
+                recognition.stop();
+            }
+        }
+    
+        // Modify the existing send-button onclick to use the speech-to-text API
+        document.getElementById('send-button').onclick = function () {
+            const userInput = getUserInput();
+            if (userInput.trim() !== "") {
+                // If the user has entered text manually, send it as a normal text message
+                sendMessage("You", userInput);
+            } else {
+                // If the user used speech-to-text, send the audio file to the server
+                const audioInput = document.getElementById('audio-input').files[0];
+                if (audioInput) {
+                    sendAudioMessage(audioInput);
+                }
+            }
+        };
+    
+        function sendAudioMessage(audioInput) {
+            const formData = new FormData();
+            formData.append('audio', audioInput);
+    
+            fetch('/speech-to-text', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the transcribed text as a user message
+                receiveMessage("You", data.transcription);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        function startTextToSpeech() {
+            var userInput = getUserInput();
+    
+            // Send user input to the server for text-to-speech
+            fetch('/text-to-speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'text': userInput,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('Text-to-speech successful.');
+                } else {
+                    console.error('Text-to-speech error:', data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    
+        function toggleChatbot() {
+        var chatIcon = document.getElementById('chatbot-icon');
+        var chatContainer = document.getElementById('chat-container');
+        
+         if (chatContainer.style.display === 'none') {
+            // Show the chat container
+            chatContainer.style.display = 'flex';
+        chatIcon.style.display = 'none';
+            // Start speaking when the chatbot interface is opened
+            speakChatbotIntroduction();
+        } else {
+            // Hide the chat container
+            chatContainer.style.display = 'none';
+    
+            // Stop speaking when the chatbot interface is closed
+            if (isSpeaking) {
+                window.speechSynthesis.cancel();
+                isSpeaking = false;
+            }
+        }
+    
+        chatContainer.classList.add('zoom-in');
+    }
+    
+        function closeChatbot() {
+        var chatIcon = document.getElementById('chatbot-icon');
+        var chatContainer = document.getElementById('chat-container');
+    
         if (isSpeaking) {
             window.speechSynthesis.cancel();
             isSpeaking = false;
         }
+    
+        // Show the chat icon
+        chatIcon.style.display = 'block';
+    
+        // Hide the chat container
+        chatContainer.style.display = 'none';
+    
+        chatContainer.classList.remove('zoom-in');
     }
-
-	chatContainer.classList.add('zoom-in');
-}
-
-	function closeChatbot() {
-    var chatIcon = document.getElementById('chatbot-icon');
-    var chatContainer = document.getElementById('chat-container');
-
-	if (isSpeaking) {
-        window.speechSynthesis.cancel();
-        isSpeaking = false;
-    }
-
-    // Show the chat icon
-    chatIcon.style.display = 'block';
-
-    // Hide the chat container
-    chatContainer.style.display = 'none';
-
-	chatContainer.classList.remove('zoom-in');
-}
-
+    
+        </script>
+    
+        <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M2WN3XCMDZ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-M2WN3XCMDZ');
     </script>
-
-	<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-M2WN3XCMDZ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-M2WN3XCMDZ');
-</script>
-
-</body>
-
-<div id="chatbot-icon" onclick="toggleChatbot()" data-tooltip="Click here for assistance">
->
-    <img src="https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp" alt="Chatbot Icon">
-</div>
-    </script>
-</body>
-</html>
+    
+    </body>
+    
+    <div id="chatbot-icon" onclick="toggleChatbot()" data-tooltip="Click here for assistance">
+    >
+        <img src="https://assets.website-files.com/636b968ac38dd1495ec4edcd/63c97bbbdeecd68494958b5d_manga-character_AI%20Avatar%20Dyvo.webp" alt="Chatbot Icon">
+    </div>
+        </script>
+    </body>
+    </html>
+    
